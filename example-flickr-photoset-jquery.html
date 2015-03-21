@@ -4,16 +4,16 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
-		<script src="flickr-photoset-jquery.js"></script>
+		<script src="https://rawgit.com/zpalffy/flickr-photoset-jquery/master/flickr-photoset-jquery.js"></script>
 		<script>
 			$(document).ready(function() {
+				$(document).bind('photoset', function(evt, photos) {
+					if(console && console.dir) console.dir(photos);
+				});
+
 				$('#flickrPhotoset').submit(function() {
 					$('h3').remove(); // just a hack to remove the only h3 on the page that comes in from the plugin 'before' template.
-					$('#photos').empty();
-					$('#photos').flickrPhotoset($(this).find('input[name=apiKey]').val(), $(this).find('input[name=photosetId]').val()).bind('photoset', function(evt, photos) {
-						if(console && console.dir) console.dir(photos);
-					});
-
+					$('#photos').empty().flickrPhotoset($(this).find('input[name=apiKey]').val(), $(this).find('input[name=photosetId]').val());
 					return false;
 				});
 			});
