@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+		<script src="flickr-photoset-jquery.js"></script>
+		<script>
+			$(document).ready(function() {
+				$('#flickrPhotoset').submit(function() {
+					$('h3').remove(); // just a hack to remove the only h3 on the page that comes in from the plugin 'before' template.
+					$('#photos').empty();
+					$('#photos').flickrPhotoset($(this).find('input[name=apiKey]').val(), $(this).find('input[name=photosetId]').val()).bind('photoset', function(evt, photos) {
+						if(console && console.dir) console.dir(photos);
+					});
+
+					return false;
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+		<div class="container">
+		<h1>flickr-photoset-jquery example</h1>
+		<form id="flickrPhotoset" action="#">
+			<div class="form-group">
+    			<label for="apiKey">API Key</label>
+				<input type="text" id="apiKey" name="apiKey" class="form-control" />
+				<span class="help-block">Enter your Flickr API key here.  You may obtain one on the <a href="https://www.flickr.com/services/api/keys/">Flickr API Keys page</a>.</span>
+			</div>
+
+			<div class="form-group">
+    			<label for="photosetId">Photoset ID</label>
+				<input type="text" name="photosetId" id="photosetId" value="72157650920803562" class="form-control" />
+				<span class="help-block">The Photoset ID you want displayed goes here.  This is the bit in the URL when you visit an Album page, e.g. 
+					<a href="https://www.flickr.com/photos/98043140@N05/sets/72157650920803562">https://www.flickr.com/photos/98043140@N05/sets/<strong>72157650920803562</strong>/</a>.
+				</span>
+			</div>
+
+			<input type="submit" class="btn btn-primary" value="Load Photos" />
+		</form>
+
+		<div id="photos"></div>
+		</div>
+	</body>
+</html>
