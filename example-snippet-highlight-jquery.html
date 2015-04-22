@@ -1,0 +1,39 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>snippet-highlight-jquery example by zpalffy</title>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="//rawgit.com/isagalaev/highlight.js/master/src/styles/monokai_sublime.css">
+</head>
+
+<body>
+  <div class="container">
+
+  <h2>Example using only a gist id</h2>
+  <div data-gist-id="fe3f0017ba9362a18319"></div>
+
+  <h2>Example using only a pastebin id</h2>
+  <div data-pastebin-id="BB9eSxne"></div>
+  
+  <h2>Example specifying a filename where multiple files exist</h2>
+  <div data-gist-id="a030abd89ed6d0bcc34a" data-filename="gistfile1.txt"></div>
+  </div>
+
+
+
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.5/highlight.min.js"></script>
+  <script src="//rawgit.com/zpalffy/snippet-highlight-jquery/master/snippet-highlight-jquery.js"></script>
+  <script>
+    if (console) {
+  	   $(document).on('snippetLoaded', function(evt, obj) {
+         console.info(evt, obj);
+  	   });
+    }
+
+  	$.loadSnippetsOnLoad();
+  </script>
+</body>
+</html>
