@@ -14,6 +14,7 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 | [JWT Decoder](https://zpalffy.github.io/jwt-decode/) | Decode and inspect JSON Web Tokens — view the header, payload, and signature |
 | [Base64 Encoder / Decoder](https://zpalffy.github.io/base64/) | Encode or decode Base64 strings; supports Unicode |
 | [URL Encoder / Decoder](https://zpalffy.github.io/url-encode/) | Encode or decode URL components with percent-encoding |
+| [Markdown Preview](https://zpalffy.github.io/markdown/) | Live markdown preview with GFM support; renders as you type |
 
 ## Tech
 
@@ -29,7 +30,6 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 
 | Idea | Notes |
 |------|-------|
-| Markdown Previewer | [marked.js](https://marked.js.org/) CDN — live preview as you type |
 | Pomodoro Timer | Pure JS — work/break intervals, optional sound |
 | CSV → JSON | [Papa Parse](https://www.papaparse.com/) CDN — handles quoted fields, headers, edge cases |
 | YAML → JSON | [js-yaml](https://github.com/nodeca/js-yaml) CDN |

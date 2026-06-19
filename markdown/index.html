@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Preview — Free Online Live Preview Tool</title>
+  <meta name="description" content="Live markdown preview in your browser. Paste or type markdown and see it rendered instantly. Supports GFM tables, code blocks, and more. 100% client-side — your data never leaves your device.">
+  <meta name="keywords" content="markdown previewer, markdown editor, markdown renderer, markdown live preview, online markdown tool, GFM markdown, markdown to HTML">
+  <meta name="author" content="zpalffy">
+  <link rel="canonical" href="https://zpalffy.github.io/markdown/">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#818cf8" media="(prefers-color-scheme: dark)">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="zpalffy">
+  <meta property="og:title" content="Markdown Preview — Free Online Live Preview Tool">
+  <meta property="og:description" content="Live markdown preview in your browser. 100% client-side — your data never leaves your device.">
+  <meta property="og:url" content="https://zpalffy.github.io/markdown/">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Markdown Preview — Free Online Live Preview Tool">
+  <meta name="twitter:description" content="Live markdown preview in your browser. 100% client-side — your data never leaves your device.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Markdown Preview",
+    "url": "https://zpalffy.github.io/markdown/",
+    "description": "Live markdown preview in your browser. 100% client-side — your data never leaves your device.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --pico-font-size: 15px;
+      --pico-primary:           #4f46e5;
+      --pico-primary-hover:     #4338ca;
+      --pico-primary-focus:     rgba(79, 70, 229, 0.25);
+      --pico-primary-inverse:   #fff;
+      --pico-primary-underline: rgba(79, 70, 229, 0.5);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --pico-primary:           #818cf8;
+        --pico-primary-hover:     #a5b4fc;
+        --pico-primary-focus:     rgba(129, 140, 248, 0.25);
+        --pico-primary-inverse:   #1e1b4b;
+        --pico-primary-underline: rgba(129, 140, 248, 0.5);
+      }
+    }
+
+    body    { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    main    { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 1rem; gap: 0.75rem; }
+    .panels { flex: 1; min-height: 0; display: flex; gap: 1rem; }
+    .panel  { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+    .panel label   { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0; color: var(--pico-muted-color); }
+    .panel textarea,
+    .panel .preview { flex: 1; min-height: 0; margin-bottom: 0; font-size: 13px; overflow: auto; }
+    .panel textarea  { resize: none; font-family: var(--pico-font-family-monospace); }
+    .panel .preview  { padding: 1rem; border: var(--pico-border-width) solid var(--pico-form-element-border-color); border-radius: var(--pico-border-radius); background: var(--pico-form-element-background-color); }
+    .actions        { display: flex; gap: 0.5rem; align-items: center; }
+    .actions button  { margin-bottom: 0; }
+
+    #status          { font-size: 0.875rem; margin-left: 0.25rem; color: var(--pico-muted-color); }
+    #status.ok       { color: #27ae60; }
+    @media (prefers-color-scheme: dark) {
+      #status.ok     { color: #4ec9b0; }
+    }
+
+    /* Preview content resets — prevent PicoCSS nav/article styles from leaking in */
+    .preview > * { margin-top: 0; }
+    .preview > *:last-child { margin-bottom: 0; }
+    .preview p, .preview li { font-size: 0.9375rem; }
+    .preview pre  { font-size: 12px; }
+    .preview table { display: block; overflow-x: auto; }
+    .preview img  { max-width: 100%; }
+
+    .preview-empty { color: var(--pico-muted-color); font-style: italic; font-size: 0.875rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="container-fluid">
+      <ul>
+        <li><a href="../" class="secondary">← zpalffy</a></li>
+        <li><strong>Markdown Preview</strong></li>
+      </ul>
+      <ul>
+        <li><a href="https://ko-fi.com/zpalffy" target="_blank" rel="noopener noreferrer" role="button" class="outline secondary">☕ Tip Jar</a></li>
+        <li><a href="#" role="button" class="outline secondary" onclick="openAbout(); return false;">ⓘ About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="panels">
+      <div class="panel">
+        <label for="input">Markdown</label>
+        <textarea id="input" placeholder="Type or paste markdown here…" spellcheck="false" autocomplete="off"></textarea>
+      </div>
+      <div class="panel">
+        <label>Preview</label>
+        <div class="preview" id="output"><p class="preview-empty">Preview will appear here…</p></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="outline secondary" onclick="clearAll()">Clear</button>
+      <button class="outline secondary" onclick="copyMarkdown()">Copy Markdown</button>
+      <button class="outline secondary" onclick="copyHTML()">Copy HTML</button>
+      <button class="outline secondary" onclick="openSyntax(); return false;">? Syntax</button>
+      <span id="status"></span>
+    </div>
+  </main>
+
+  <dialog id="syntax-modal">
+    <article style="max-width: 36rem;">
+      <header>
+        <button aria-label="Close" rel="prev" onclick="document.getElementById('syntax-modal').close()"></button>
+        <strong>Markdown Syntax</strong>
+      </header>
+      <table>
+        <thead><tr><th>Markdown</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td><code># Heading 1</code></td><td>H1 heading</td></tr>
+          <tr><td><code>## Heading 2</code></td><td>H2 heading</td></tr>
+          <tr><td><code>**bold**</code></td><td><strong>bold</strong></td></tr>
+          <tr><td><code>*italic*</code></td><td><em>italic</em></td></tr>
+          <tr><td><code>~~strike~~</code></td><td><s>strikethrough</s></td></tr>
+          <tr><td><code>`inline code`</code></td><td><code>inline code</code></td></tr>
+          <tr><td><code>[text](url)</code></td><td>link</td></tr>
+          <tr><td><code>![alt](url)</code></td><td>image</td></tr>
+          <tr><td><code>&gt; text</code></td><td>blockquote</td></tr>
+          <tr><td><code>- item</code></td><td>unordered list</td></tr>
+          <tr><td><code>1. item</code></td><td>ordered list</td></tr>
+          <tr><td><code>- [x] task</code></td><td>task list (GFM)</td></tr>
+          <tr><td><code>| a | b |</code></td><td>table (GFM)</td></tr>
+          <tr><td><code>```lang</code> … <code>```</code></td><td>code block</td></tr>
+          <tr><td><code>---</code></td><td>horizontal rule</td></tr>
+        </tbody>
+      </table>
+      <footer>
+        <button onclick="document.getElementById('syntax-modal').close()">Close</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <dialog id="about-modal">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" onclick="document.getElementById('about-modal').close()"></button>
+        <strong>Privacy &amp; About</strong>
+      </header>
+      <p>Everything on this site runs entirely in your browser. When you type or paste markdown, it is rendered locally using JavaScript — nothing is ever sent to a server, stored in a database, or transmitted anywhere.</p>
+      <p>No accounts. No analytics. No tracking. No cookies.</p>
+      <p>Your data is yours and never leaves your device.</p>
+      <footer>
+        <button onclick="document.getElementById('about-modal').close()">Got it</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <script>
+    const inputEl  = document.getElementById('input');
+    const outputEl = document.getElementById('output');
+    const statusEl = document.getElementById('status');
+
+    marked.use({ gfm: true });
+
+    function render() {
+      const md = inputEl.value;
+      if (!md.trim()) {
+        outputEl.innerHTML = '<p class="preview-empty">Preview will appear here…</p>';
+        setStatus('', '');
+        return;
+      }
+      outputEl.innerHTML = marked.parse(md);
+      const words = md.trim().split(/\s+/).length;
+      const lines = md.split('\n').length;
+      setStatus('ok', `${words.toLocaleString()} word${words === 1 ? '' : 's'} · ${lines.toLocaleString()} line${lines === 1 ? '' : 's'}`);
+    }
+
+    function clearAll() {
+      inputEl.value = '';
+      render();
+    }
+
+    function copyMarkdown() {
+      const text = inputEl.value;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => setStatus('ok', 'Markdown copied!'));
+    }
+
+    function copyHTML() {
+      const html = outputEl.innerHTML;
+      if (!html || outputEl.querySelector('.preview-empty')) return;
+      navigator.clipboard.writeText(html).then(() => setStatus('ok', 'HTML copied!'));
+    }
+
+    function setStatus(type, msg) {
+      statusEl.textContent = msg;
+      statusEl.className = type;
+    }
+
+    function openSyntax() {
+      document.getElementById('syntax-modal').showModal();
+    }
+
+    function openAbout() {
+      document.getElementById('about-modal').showModal();
+    }
+
+    inputEl.addEventListener('input', render);
+  </script>
+</body>
+</html>
