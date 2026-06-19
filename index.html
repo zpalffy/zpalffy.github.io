@@ -57,37 +57,51 @@
           {
             "@type": "ListItem",
             "position": 3,
+            "name": "QR Code Generator",
+            "description": "Generate QR codes from any text or URL. Download as PNG. 100% client-side.",
+            "url": "https://zpalffy.github.io/qr/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
             "name": "UUID Generator",
             "description": "Generate random v4 UUIDs in your browser. Bulk generation, dashes, uppercase. 100% client-side.",
             "url": "https://zpalffy.github.io/uuid/"
           },
           {
             "@type": "ListItem",
-            "position": 4,
+            "position": 5,
             "name": "Password Generator",
             "description": "Generate secure random passwords using the Web Crypto API. Customize length and character sets. 100% client-side.",
             "url": "https://zpalffy.github.io/password/"
           },
           {
             "@type": "ListItem",
-            "position": 5,
+            "position": 6,
             "name": "JWT Decoder",
             "description": "Decode and inspect JWT tokens. View the header, payload, and signature. 100% client-side.",
             "url": "https://zpalffy.github.io/jwt-decode/"
           },
           {
             "@type": "ListItem",
-            "position": 6,
+            "position": 7,
             "name": "Base64 Encoder / Decoder",
             "description": "Encode or decode Base64 strings instantly. Supports Unicode. 100% client-side.",
             "url": "https://zpalffy.github.io/base64/"
           },
           {
             "@type": "ListItem",
-            "position": 7,
+            "position": 8,
             "name": "URL Encoder / Decoder",
             "description": "Encode or decode URL components instantly. 100% client-side.",
             "url": "https://zpalffy.github.io/url-encode/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 9,
+            "name": "Unix Timestamp Converter",
+            "description": "Convert Unix timestamps to human-readable dates and back. Seconds or milliseconds. 100% client-side.",
+            "url": "https://zpalffy.github.io/timestamp/"
           }
         ]
       }
@@ -142,6 +156,8 @@
     .tool-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
     @media (max-width: 600px) { .tool-grid { grid-template-columns: 1fr; } }
 
+    article.c-orange  { --card-color: #ea580c; }
+    article.c-teal    { --card-color: #0d9488; }
     article.c-violet  { --card-color: #7c3aed; }
     article.c-emerald { --card-color: #059669; }
     article.c-amber   { --card-color: #b45309; }
@@ -150,6 +166,8 @@
     article.c-cyan    { --card-color: #0891b2; }
     article.c-purple  { --card-color: #9333ea; }
     @media (prefers-color-scheme: dark) {
+      article.c-orange  { --card-color: #fb923c; }
+      article.c-teal    { --card-color: #2dd4bf; }
       article.c-violet  { --card-color: #a78bfa; }
       article.c-emerald { --card-color: #34d399; }
       article.c-amber   { --card-color: #fbbf24; }
@@ -198,6 +216,14 @@
             </hgroup>
           </article>
         </a>
+        <a class="card-link" href="qr/">
+          <article class="tool-card c-orange">
+            <hgroup>
+              <h3>QR Code Generator →</h3>
+              <p>Generate a QR code from any text or URL. Download as PNG.</p>
+            </hgroup>
+          </article>
+        </a>
         <a class="card-link" href="uuid/">
           <article class="tool-card c-violet">
             <hgroup>
@@ -235,6 +261,14 @@
             <hgroup>
               <h3>URL Encoder / Decoder →</h3>
               <p>Encode or decode URL components with percent-encoding.</p>
+            </hgroup>
+          </article>
+        </a>
+        <a class="card-link" href="timestamp/">
+          <article class="tool-card c-teal">
+            <hgroup>
+              <h3>Unix Timestamp →</h3>
+              <p>Convert epoch timestamps to dates and back. Live relative time.</p>
             </hgroup>
           </article>
         </a>
