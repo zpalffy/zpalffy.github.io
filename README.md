@@ -20,6 +20,7 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 | [Markdown Preview](https://zpalffy.github.io/markdown/) | Live markdown preview with GFM support; renders as you type |
 | [Pomodoro Timer](https://zpalffy.github.io/pomodoro/) | Focus timer with work/break intervals, sound alerts, and browser notifications |
 | [Unix Timestamp Converter](https://zpalffy.github.io/timestamp/) | Convert epoch timestamps to human-readable dates and back; live relative time |
+| [CSV → JSON Converter](https://zpalffy.github.io/csv/) | Convert CSV to JSON or browse as a table; auto-detects delimiters and headers |
 
 ## Tech
 
@@ -35,17 +36,11 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 
 | Idea | Notes |
 |------|-------|
-| CSV → JSON | [Papa Parse](https://www.papaparse.com/) CDN — handles quoted fields, headers, edge cases |
-| YAML → JSON | [js-yaml](https://github.com/nodeca/js-yaml) CDN |
-| Regex Tester | Pure JS — live match highlighting against test input |
-| Cron Explainer | [cronstrue](https://github.com/bradymholt/cronstrue) CDN — `0 */6 * * *` → "Every 6 hours" |
-| Color Converter | Pure JS — HEX ↔ RGB ↔ HSL with visual swatch |
+| Cron Builder / Explainer | [cronstrue](https://github.com/bradymholt/cronstrue) CDN for explain direction; pure JS visual builder for reverse (pick schedule → get expression) |
 | Diff Viewer | [diff2html](https://diff2html.xyz/) CDN — paste two blocks, see a diff |
-| Unit Converter | Pure JS — temperature, weight, length |
 
 ### Games
 
 | Idea | Notes |
 |------|-------|
 | Flash Cards | localStorage for card decks, flip animation |
-| Memory Match | Classic card-flip matching game |

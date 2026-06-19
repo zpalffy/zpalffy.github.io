@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV to JSON Converter — Free Online Tool</title>
+  <meta name="description" content="Convert CSV to JSON instantly in your browser. Supports headers, auto-detects delimiters, and shows a live table preview. 100% client-side — your data never leaves your device.">
+  <meta name="keywords" content="CSV to JSON, CSV converter, CSV parser, CSV to JSON online, CSV table viewer, parse CSV, CSV tool">
+  <meta name="author" content="zpalffy">
+  <link rel="canonical" href="https://zpalffy.github.io/csv/">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#818cf8" media="(prefers-color-scheme: dark)">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="zpalffy">
+  <meta property="og:title" content="CSV to JSON Converter — Free Online Tool">
+  <meta property="og:description" content="Convert CSV to JSON instantly in your browser. Live table preview, auto-detects delimiters. 100% client-side — your data never leaves your device.">
+  <meta property="og:url" content="https://zpalffy.github.io/csv/">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="CSV to JSON Converter — Free Online Tool">
+  <meta name="twitter:description" content="Convert CSV to JSON instantly in your browser. 100% client-side — your data never leaves your device.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "CSV to JSON Converter",
+    "url": "https://zpalffy.github.io/csv/",
+    "description": "Convert CSV to JSON instantly in your browser. Supports headers, auto-detects delimiters. 100% client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/papaparse/papaparse.min.js"></script>
+  <style>
+    :root {
+      --pico-font-size: 15px;
+      --pico-primary:           #4f46e5;
+      --pico-primary-hover:     #4338ca;
+      --pico-primary-focus:     rgba(79, 70, 229, 0.25);
+      --pico-primary-inverse:   #fff;
+      --pico-primary-underline: rgba(79, 70, 229, 0.5);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --pico-primary:           #818cf8;
+        --pico-primary-hover:     #a5b4fc;
+        --pico-primary-focus:     rgba(129, 140, 248, 0.25);
+        --pico-primary-inverse:   #1e1b4b;
+        --pico-primary-underline: rgba(129, 140, 248, 0.5);
+      }
+    }
+
+    body    { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    main    { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 1rem; gap: 0.75rem; }
+    .panels { flex: 1; min-height: 0; display: flex; gap: 1rem; }
+    .panel  { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+    .panel > label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0; color: var(--pico-muted-color); }
+    .panel textarea { flex: 1; min-height: 0; margin-bottom: 0; font-family: var(--pico-font-family-monospace); font-size: 13px; overflow: auto; resize: none; }
+    .actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .actions button { margin-bottom: 0; }
+
+    /* Output panel */
+    .output { flex: 1; min-height: 0; overflow: auto; border: var(--pico-border-width) solid var(--pico-form-element-border-color); border-radius: var(--pico-border-radius); background: var(--pico-form-element-background-color); }
+    .output pre  { margin: 0; padding: 1rem; font-size: 13px; white-space: pre; font-family: var(--pico-font-family-monospace); }
+    .output table { margin: 0; display: table; font-size: 13px; }
+    .output th, .output td { white-space: nowrap; }
+    .output .msg { padding: 1rem; font-size: 0.875rem; font-style: italic; color: var(--pico-muted-color); }
+    .output .err { padding: 1rem; font-size: 0.875rem; color: #c0392b; }
+    @media (prefers-color-scheme: dark) { .output .err { color: #f48771; } }
+
+    /* View toggle */
+    .view-toggle { display: flex; gap: 0; }
+    .view-toggle button { margin-bottom: 0; border-radius: 0; padding: 0.4rem 0.9rem; font-size: 0.875rem; }
+    .view-toggle button:first-child { border-radius: var(--pico-border-radius) 0 0 var(--pico-border-radius); border-right: none; }
+    .view-toggle button:last-child  { border-radius: 0 var(--pico-border-radius) var(--pico-border-radius) 0; }
+    .view-toggle button.secondary   { background: transparent; }
+
+    /* Header checkbox */
+    .opt-label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.875rem; cursor: pointer; white-space: nowrap; }
+    .opt-label input { margin-bottom: 0; }
+
+    #status      { font-size: 0.875rem; margin-left: 0.25rem; color: var(--pico-muted-color); }
+    #status.ok   { color: #27ae60; }
+    #status.err  { color: #c0392b; }
+    @media (prefers-color-scheme: dark) {
+      #status.ok  { color: #4ec9b0; }
+      #status.err { color: #f48771; }
+    }
+
+    /* JSON syntax highlighting */
+    .jk { color: #0550ae; } .js { color: #116329; } .jn { color: #953800; }
+    .jb { color: #8250df; } .jl { color: #6e7781; }
+    @media (prefers-color-scheme: dark) {
+      .jk { color: #79c0ff; } .js { color: #7ee787; } .jn { color: #ffa657; }
+      .jb { color: #d2a8ff; } .jl { color: #8b949e; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="container-fluid">
+      <ul>
+        <li><a href="../" class="secondary">← zpalffy</a></li>
+        <li><strong>CSV → JSON</strong></li>
+      </ul>
+      <ul>
+        <li><a href="https://ko-fi.com/zpalffy" target="_blank" rel="noopener noreferrer" role="button" class="outline secondary">☕ Tip Jar</a></li>
+        <li><a href="#" role="button" class="outline secondary" onclick="openAbout(); return false;">ⓘ About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="panels">
+      <div class="panel">
+        <label for="input">CSV</label>
+        <textarea id="input" placeholder="Paste CSV here…" spellcheck="false" autocomplete="off"></textarea>
+      </div>
+      <div class="panel">
+        <label>Output</label>
+        <div class="output" id="output">
+          <p class="msg">Paste CSV on the left…</p>
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="view-toggle">
+        <button id="btn-table" onclick="setView('table')">Table</button>
+        <button id="btn-json"  onclick="setView('json')" class="secondary outline">JSON</button>
+      </div>
+      <label class="opt-label">
+        <input type="checkbox" id="headers" checked onchange="parse()"> First row is headers
+      </label>
+      <button class="outline secondary" onclick="copyJSON()">Copy JSON</button>
+      <button class="outline secondary" onclick="clearAll()">Clear</button>
+      <span id="status"></span>
+    </div>
+  </main>
+
+  <dialog id="about-modal">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" onclick="document.getElementById('about-modal').close()"></button>
+        <strong>Privacy &amp; About</strong>
+      </header>
+      <p>Everything on this site runs entirely in your browser. When you paste CSV data, it is parsed locally using <a href="https://www.papaparse.com/" target="_blank" rel="noopener noreferrer">Papa Parse</a> — nothing is ever sent to a server, stored in a database, or transmitted anywhere.</p>
+      <p>No accounts. No analytics. No tracking. No cookies.</p>
+      <p>Your data is yours and never leaves your device.</p>
+      <footer>
+        <button onclick="document.getElementById('about-modal').close()">Got it</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <script>
+    const inputEl  = document.getElementById('input');
+    const outputEl = document.getElementById('output');
+    const statusEl = document.getElementById('status');
+    let lastResult  = null;
+    let currentView = 'table';
+
+    function parse() {
+      const raw = inputEl.value.trim();
+      if (!raw) { outputEl.innerHTML = '<p class="msg">Paste CSV on the left…</p>'; lastResult = null; setStatus('', ''); return; }
+
+      const result = Papa.parse(raw, {
+        header: document.getElementById('headers').checked,
+        skipEmptyLines: true,
+        dynamicTyping: false,
+      });
+
+      if (result.errors.length && !result.data.length) {
+        outputEl.innerHTML = `<p class="err">${esc(result.errors[0].message)}</p>`;
+        setStatus('err', 'Parse error');
+        lastResult = null;
+        return;
+      }
+
+      lastResult = result;
+      renderView();
+
+      const rows  = result.data.length;
+      const cols  = result.meta.fields ? result.meta.fields.length : (result.data[0] ? result.data[0].length : 0);
+      const delim = result.meta.delimiter === '\t' ? 'tab' : `"${result.meta.delimiter}"`;
+      setStatus('ok', `${rows.toLocaleString()} row${rows !== 1 ? 's' : ''} · ${cols} col${cols !== 1 ? 's' : ''} · delimiter ${delim}`);
+    }
+
+    function setView(view) {
+      currentView = view;
+      document.getElementById('btn-table').className = view === 'table' ? '' : 'secondary outline';
+      document.getElementById('btn-json').className  = view === 'json'  ? '' : 'secondary outline';
+      if (lastResult) renderView();
+    }
+
+    function renderView() {
+      currentView === 'table' ? renderTable() : renderJSON();
+    }
+
+    function renderTable() {
+      const { data, meta } = lastResult;
+      const hasHeaders = !!meta.fields;
+      const headers = hasHeaders ? meta.fields : (data[0] ? data[0].map((_, i) => `Col ${i + 1}`) : []);
+      const rows    = hasHeaders ? data : data;
+
+      let html = '<table><thead><tr>' + headers.map(h => `<th>${esc(String(h))}</th>`).join('') + '</tr></thead><tbody>';
+      rows.forEach(row => {
+        html += '<tr>' + headers.map((h, i) => {
+          const val = hasHeaders ? row[h] : row[i];
+          return `<td>${esc(String(val ?? ''))}</td>`;
+        }).join('') + '</tr>';
+      });
+      html += '</tbody></table>';
+      outputEl.innerHTML = html;
+    }
+
+    function renderJSON() {
+      const json = JSON.stringify(lastResult.data, null, 2);
+      outputEl.innerHTML = `<pre>${highlight(json)}</pre>`;
+    }
+
+    function highlight(json) {
+      return json
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(
+          /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*"(?:\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+          m => {
+            if (m[0] === '"') return m.endsWith(':') ? `<span class="jk">${m}</span>` : `<span class="js">${m}</span>`;
+            if (m === 'true' || m === 'false') return `<span class="jb">${m}</span>`;
+            if (m === 'null') return `<span class="jl">${m}</span>`;
+            return `<span class="jn">${m}</span>`;
+          }
+        );
+    }
+
+    function esc(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function copyJSON() {
+      if (!lastResult) return;
+      navigator.clipboard.writeText(JSON.stringify(lastResult.data, null, 2))
+        .then(() => setStatus('ok', 'Copied!'));
+    }
+
+    function clearAll() {
+      inputEl.value = '';
+      outputEl.innerHTML = '<p class="msg">Paste CSV on the left…</p>';
+      lastResult = null;
+      setStatus('', '');
+    }
+
+    function setStatus(type, msg) {
+      statusEl.textContent = msg;
+      statusEl.className = type;
+    }
+
+    function openAbout() {
+      document.getElementById('about-modal').showModal();
+    }
+
+    inputEl.addEventListener('input', parse);
+    inputEl.addEventListener('paste', () => setTimeout(parse, 0));
+  </script>
+</body>
+</html>

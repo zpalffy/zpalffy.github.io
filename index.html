@@ -109,6 +109,13 @@
             "name": "Unix Timestamp Converter",
             "description": "Convert Unix timestamps to human-readable dates and back. Seconds or milliseconds. 100% client-side.",
             "url": "https://zpalffy.github.io/timestamp/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 11,
+            "name": "CSV to JSON Converter",
+            "description": "Convert CSV to JSON instantly. Live table preview, auto-detects delimiters. 100% client-side.",
+            "url": "https://zpalffy.github.io/csv/"
           }
         ]
       }
@@ -177,6 +184,7 @@
     article.c-red     { --card-color: #dc2626; }
     article.c-cyan    { --card-color: #0891b2; }
     article.c-purple  { --card-color: #9333ea; }
+    article.c-lime    { --card-color: #65a30d; }
     @media (prefers-color-scheme: dark) {
       article.c-orange  { --card-color: #fb923c; }
       article.c-teal    { --card-color: #2dd4bf; }
@@ -188,6 +196,7 @@
       article.c-red     { --card-color: #f87171; }
       article.c-cyan    { --card-color: #22d3ee; }
       article.c-purple  { --card-color: #c084fc; }
+      article.c-lime    { --card-color: #84cc16; }
     }
   </style>
 </head>
@@ -211,8 +220,7 @@
     </hgroup>
 
     <div class="intro">
-      <p>A small collection of tools I kept wishing existed without the ads, the sign-up walls, or the "paste your sensitive data into our server" energy. Everything here is client-side — when you paste a JWT or generate a password, it never touches a server.</p>
-      <p>Built with vanilla JS and minimal dependencies. No frameworks, no tracking, no nonsense. If something saves you a Google search, a <a href="https://ko-fi.com/zpalffy" target="_blank" rel="noopener noreferrer">small tip ☕</a> is always appreciated.</p>
+      <p>A small collection of tools I kept wishing existed without the ads, the sign-up walls, or the "paste your sensitive data into our server" energy. Everything here is client-side — when you paste a JWT or generate a password, it never touches a server.  Built with vanilla JS and minimal dependencies. No frameworks, no tracking, no nonsense.</p>
     </div>
 
     <section>
@@ -295,6 +303,14 @@
             <hgroup>
               <h3>Unix Timestamp →</h3>
               <p>Convert epoch timestamps to dates and back. Live relative time.</p>
+            </hgroup>
+          </article>
+        </a>
+        <a class="card-link" href="csv/">
+          <article class="tool-card c-lime">
+            <hgroup>
+              <h3>CSV → JSON → Table</h3>
+              <p>Convert CSV to JSON or browse as a table. Auto-detects delimiters and headers.</p>
             </hgroup>
           </article>
         </a>
