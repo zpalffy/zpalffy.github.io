@@ -57,20 +57,34 @@
           {
             "@type": "ListItem",
             "position": 3,
+            "name": "UUID Generator",
+            "description": "Generate random v4 UUIDs in your browser. Bulk generation, dashes, uppercase. 100% client-side.",
+            "url": "https://zpalffy.github.io/uuid/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Password Generator",
+            "description": "Generate secure random passwords using the Web Crypto API. Customize length and character sets. 100% client-side.",
+            "url": "https://zpalffy.github.io/password/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
             "name": "JWT Decoder",
             "description": "Decode and inspect JWT tokens. View the header, payload, and signature. 100% client-side.",
             "url": "https://zpalffy.github.io/jwt-decode/"
           },
           {
             "@type": "ListItem",
-            "position": 4,
+            "position": 6,
             "name": "Base64 Encoder / Decoder",
             "description": "Encode or decode Base64 strings instantly. Supports Unicode. 100% client-side.",
             "url": "https://zpalffy.github.io/base64/"
           },
           {
             "@type": "ListItem",
-            "position": 5,
+            "position": 7,
             "name": "URL Encoder / Decoder",
             "description": "Encode or decode URL components instantly. 100% client-side.",
             "url": "https://zpalffy.github.io/url-encode/"
@@ -121,12 +135,29 @@
     }
 
     a.card-link { display: block; text-decoration: none; color: inherit; }
-    article.tool-card { border-left: 3px solid var(--pico-primary); transition: box-shadow 0.15s; height: 100%; padding: 0.75rem 1rem; }
-    a.card-link:hover article.tool-card { box-shadow: 0 4px 16px var(--pico-primary-focus); }
-    article.tool-card h3 { font-size: 1rem; margin-bottom: 0.25rem; color: var(--pico-primary); }
+    article.tool-card { --card-color: var(--pico-primary); border-left: 3px solid var(--card-color); transition: box-shadow 0.15s; height: 100%; padding: 0.75rem 1rem; }
+    a.card-link:hover article.tool-card { box-shadow: 0 4px 16px color-mix(in srgb, var(--card-color) 25%, transparent); }
+    article.tool-card h3 { font-size: 1rem; margin-bottom: 0.25rem; color: var(--card-color); }
     article.tool-card p  { font-size: 0.875rem; margin-bottom: 0; }
     .tool-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
     @media (max-width: 600px) { .tool-grid { grid-template-columns: 1fr; } }
+
+    article.c-violet  { --card-color: #7c3aed; }
+    article.c-emerald { --card-color: #059669; }
+    article.c-amber   { --card-color: #b45309; }
+    article.c-blue    { --card-color: #2563eb; }
+    article.c-red     { --card-color: #dc2626; }
+    article.c-cyan    { --card-color: #0891b2; }
+    article.c-purple  { --card-color: #9333ea; }
+    @media (prefers-color-scheme: dark) {
+      article.c-violet  { --card-color: #a78bfa; }
+      article.c-emerald { --card-color: #34d399; }
+      article.c-amber   { --card-color: #fbbf24; }
+      article.c-blue    { --card-color: #60a5fa; }
+      article.c-red     { --card-color: #f87171; }
+      article.c-cyan    { --card-color: #22d3ee; }
+      article.c-purple  { --card-color: #c084fc; }
+    }
   </style>
 </head>
 <body>
@@ -152,7 +183,7 @@
       <h2>Tools</h2>
       <div class="tool-grid">
         <a class="card-link" href="markdown/">
-          <article class="tool-card">
+          <article class="tool-card c-amber">
             <hgroup>
               <h3>Markdown Preview →</h3>
               <p>Live markdown preview with GFM tables, code blocks, and more.</p>
@@ -160,15 +191,31 @@
           </article>
         </a>
         <a class="card-link" href="json-format/">
-          <article class="tool-card">
+          <article class="tool-card c-blue">
             <hgroup>
               <h3>JSON Formatter →</h3>
               <p>Format, pretty-print, and validate JSON with syntax highlighting.</p>
             </hgroup>
           </article>
         </a>
+        <a class="card-link" href="uuid/">
+          <article class="tool-card c-violet">
+            <hgroup>
+              <h3>UUID Generator →</h3>
+              <p>Generate random v4 UUIDs. Bulk generation, dashes, and uppercase options.</p>
+            </hgroup>
+          </article>
+        </a>
+        <a class="card-link" href="password/">
+          <article class="tool-card c-emerald">
+            <hgroup>
+              <h3>Password Generator →</h3>
+              <p>Generate secure random passwords. Customize length and character sets.</p>
+            </hgroup>
+          </article>
+        </a>
         <a class="card-link" href="jwt-decode/">
-          <article class="tool-card">
+          <article class="tool-card c-red">
             <hgroup>
               <h3>JWT Decoder →</h3>
               <p>Decode and inspect JSON Web Tokens — view the header, payload, and signature.</p>
@@ -176,7 +223,7 @@
           </article>
         </a>
         <a class="card-link" href="base64/">
-          <article class="tool-card">
+          <article class="tool-card c-cyan">
             <hgroup>
               <h3>Base64 Encoder / Decoder →</h3>
               <p>Encode or decode Base64 strings. Supports Unicode.</p>
@@ -184,7 +231,7 @@
           </article>
         </a>
         <a class="card-link" href="url-encode/">
-          <article class="tool-card">
+          <article class="tool-card c-purple">
             <hgroup>
               <h3>URL Encoder / Decoder →</h3>
               <p>Encode or decode URL components with percent-encoding.</p>

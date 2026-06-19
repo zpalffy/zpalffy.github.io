@@ -14,6 +14,8 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 | [JWT Decoder](https://zpalffy.github.io/jwt-decode/) | Decode and inspect JSON Web Tokens — view the header, payload, and signature |
 | [Base64 Encoder / Decoder](https://zpalffy.github.io/base64/) | Encode or decode Base64 strings; supports Unicode |
 | [URL Encoder / Decoder](https://zpalffy.github.io/url-encode/) | Encode or decode URL components with percent-encoding |
+| [UUID Generator](https://zpalffy.github.io/uuid/) | Generate random v4 UUIDs; bulk generation, dashes, uppercase |
+| [Password Generator](https://zpalffy.github.io/password/) | Generate secure random passwords; customize length and character sets |
 | [Markdown Preview](https://zpalffy.github.io/markdown/) | Live markdown preview with GFM support; renders as you type |
 
 ## Tech
@@ -37,8 +39,6 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 | QR Code Generator | [qrcode.js](https://davidshimjs.github.io/qrcodejs/) CDN |
 | Cron Explainer | [cronstrue](https://github.com/bradymholt/cronstrue) CDN — `0 */6 * * *` → "Every 6 hours" |
 | Unix Timestamp Converter | Pure JS `Date` — epoch ↔ human-readable, multiple timezones |
-| Password Generator | Pure JS `crypto.getRandomValues` — length, charset options |
-| UUID Generator | Pure JS `crypto.randomUUID()` |
 | Color Converter | Pure JS — HEX ↔ RGB ↔ HSL with visual swatch |
 | Diff Viewer | [diff2html](https://diff2html.xyz/) CDN — paste two blocks, see a diff |
 | Unit Converter | Pure JS — temperature, weight, length |

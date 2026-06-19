@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Generator — Free Online Secure Password Tool</title>
+  <meta name="description" content="Generate secure random passwords in your browser using the Web Crypto API. Customize length and character sets. 100% client-side — your data never leaves your device.">
+  <meta name="keywords" content="password generator, secure password, random password, strong password generator, online password tool, crypto password, password strength">
+  <meta name="author" content="zpalffy">
+  <link rel="canonical" href="https://zpalffy.github.io/password/">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#818cf8" media="(prefers-color-scheme: dark)">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="zpalffy">
+  <meta property="og:title" content="Password Generator — Free Online Secure Password Tool">
+  <meta property="og:description" content="Generate secure random passwords in your browser. Customize length and character sets. 100% client-side — your data never leaves your device.">
+  <meta property="og:url" content="https://zpalffy.github.io/password/">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Password Generator — Free Online Secure Password Tool">
+  <meta name="twitter:description" content="Generate secure random passwords in your browser. 100% client-side — your data never leaves your device.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Password Generator",
+    "url": "https://zpalffy.github.io/password/",
+    "description": "Generate secure random passwords in your browser using the Web Crypto API. 100% client-side.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>
+    :root {
+      --pico-font-size: 15px;
+      --pico-primary:           #4f46e5;
+      --pico-primary-hover:     #4338ca;
+      --pico-primary-focus:     rgba(79, 70, 229, 0.25);
+      --pico-primary-inverse:   #fff;
+      --pico-primary-underline: rgba(79, 70, 229, 0.5);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --pico-primary:           #818cf8;
+        --pico-primary-hover:     #a5b4fc;
+        --pico-primary-focus:     rgba(129, 140, 248, 0.25);
+        --pico-primary-inverse:   #1e1b4b;
+        --pico-primary-underline: rgba(129, 140, 248, 0.5);
+      }
+    }
+
+    body    { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    main    { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 1rem; gap: 0.75rem; }
+    .panels { flex: 1; min-height: 0; display: flex; gap: 1rem; }
+    .panel  { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+    .panel > label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0; color: var(--pico-muted-color); }
+    .panel pre { flex: 1; min-height: 0; margin-bottom: 0; font-family: var(--pico-font-family-monospace); font-size: 13px; overflow: auto; white-space: pre-wrap; word-break: break-all; padding: 1rem; }
+    .actions { display: flex; gap: 0.5rem; align-items: center; }
+    .actions button { margin-bottom: 0; }
+
+    .panel.opts { flex: 0 0 200px; }
+    .panel.opts label.opt { font-size: 0.875rem; text-transform: none; letter-spacing: 0; font-weight: normal; color: inherit; display: flex; align-items: center; gap: 0.4rem; cursor: pointer; margin-bottom: 0.1rem; }
+    .panel.opts label.opt input { margin-bottom: 0; }
+    .panel.opts .length-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .panel.opts .length-row input[type="range"] { flex: 1; margin-bottom: 0; }
+    .panel.opts .length-val { font-family: var(--pico-font-family-monospace); font-size: 0.875rem; min-width: 2ch; text-align: right; }
+
+    #status        { font-size: 0.875rem; margin-left: 0.25rem; }
+    #status.strong { color: #27ae60; }
+    #status.good   { color: var(--pico-primary); }
+    #status.fair   { color: var(--pico-muted-color); }
+    #status.weak   { color: #c0392b; }
+    #status.err    { color: #c0392b; }
+    @media (prefers-color-scheme: dark) {
+      #status.strong { color: #4ec9b0; }
+      #status.weak,
+      #status.err    { color: #f48771; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="container-fluid">
+      <ul>
+        <li><a href="../" class="secondary">← zpalffy</a></li>
+        <li><strong>Password Generator</strong></li>
+      </ul>
+      <ul>
+        <li><a href="https://ko-fi.com/zpalffy" target="_blank" rel="noopener noreferrer" role="button" class="outline secondary">☕ Tip Jar</a></li>
+        <li><a href="#" role="button" class="outline secondary" onclick="openAbout(); return false;">ⓘ About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="panels">
+      <div class="panel opts">
+        <label>Options</label>
+        <label for="length">Length</label>
+        <div class="length-row">
+          <input type="range" id="length" min="4" max="128" value="16" oninput="onLengthChange(this.value)">
+          <span class="length-val" id="length-val">16</span>
+        </div>
+        <label class="opt"><input type="checkbox" id="upper"   checked onchange="generate()"> Uppercase A–Z</label>
+        <label class="opt"><input type="checkbox" id="lower"   checked onchange="generate()"> Lowercase a–z</label>
+        <label class="opt"><input type="checkbox" id="digits"  checked onchange="generate()"> Numbers 0–9</label>
+        <label class="opt"><input type="checkbox" id="symbols" checked onchange="generate()"> Symbols</label>
+      </div>
+      <div class="panel">
+        <label>Password</label>
+        <pre id="output"></pre>
+      </div>
+    </div>
+    <div class="actions">
+      <button onclick="generate()">Generate</button>
+      <button class="outline secondary" onclick="copyPassword()">Copy</button>
+      <span id="status"></span>
+    </div>
+  </main>
+
+  <dialog id="about-modal">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" onclick="document.getElementById('about-modal').close()"></button>
+        <strong>Privacy &amp; About</strong>
+      </header>
+      <p>Passwords are generated locally in your browser using <code>crypto.getRandomValues()</code> — the same Web Crypto API used by operating systems for cryptographically secure randomness. Nothing is ever sent to a server, stored in a database, or transmitted anywhere.</p>
+      <p>No accounts. No analytics. No tracking. No cookies.</p>
+      <p>Your data is yours and never leaves your device.</p>
+      <footer>
+        <button onclick="document.getElementById('about-modal').close()">Got it</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <script>
+    const outputEl = document.getElementById('output');
+    const statusEl = document.getElementById('status');
+    const lengthEl = document.getElementById('length');
+
+    function onLengthChange(val) {
+      document.getElementById('length-val').textContent = val;
+      generate();
+    }
+
+    function generate() {
+      const length = parseInt(lengthEl.value);
+      let charset = '';
+      if (document.getElementById('upper').checked)   charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      if (document.getElementById('lower').checked)   charset += 'abcdefghijklmnopqrstuvwxyz';
+      if (document.getElementById('digits').checked)  charset += '0123456789';
+      if (document.getElementById('symbols').checked) charset += '!@#$%^&*()_+-=[]{}|;:,.?';
+
+      if (!charset) {
+        outputEl.textContent = '';
+        setStatus('err', 'Select at least one character set');
+        return;
+      }
+
+      const arr = new Uint32Array(length);
+      crypto.getRandomValues(arr);
+      outputEl.textContent = Array.from(arr, n => charset[n % charset.length]).join('');
+
+      const entropy = Math.floor(length * Math.log2(charset.length));
+      const [cls, label] = entropy >= 80 ? ['strong', 'Strong'] :
+                           entropy >= 60 ? ['good',   'Good']   :
+                           entropy >= 40 ? ['fair',   'Fair']   :
+                                           ['weak',   'Weak'];
+      setStatus(cls, `${length} chars · ~${entropy} bits · ${label}`);
+    }
+
+    function copyPassword() {
+      const text = outputEl.textContent;
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => setStatus('good', 'Copied!'));
+    }
+
+    function setStatus(type, msg) {
+      statusEl.textContent = msg;
+      statusEl.className = type;
+    }
+
+    function openAbout() {
+      document.getElementById('about-modal').showModal();
+    }
+
+    generate();
+  </script>
+</body>
+</html>
