@@ -18,6 +18,7 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 | [UUID Generator](https://zpalffy.github.io/uuid/) | Generate random v4 UUIDs; bulk generation, dashes, uppercase |
 | [Password Generator](https://zpalffy.github.io/password/) | Generate secure random passwords; customize length and character sets |
 | [Markdown Preview](https://zpalffy.github.io/markdown/) | Live markdown preview with GFM support; renders as you type |
+| [Pomodoro Timer](https://zpalffy.github.io/pomodoro/) | Focus timer with work/break intervals, sound alerts, and browser notifications |
 | [Unix Timestamp Converter](https://zpalffy.github.io/timestamp/) | Convert epoch timestamps to human-readable dates and back; live relative time |
 
 ## Tech
@@ -34,7 +35,6 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 
 | Idea | Notes |
 |------|-------|
-| Pomodoro Timer | Pure JS — work/break intervals, optional sound |
 | CSV → JSON | [Papa Parse](https://www.papaparse.com/) CDN — handles quoted fields, headers, edge cases |
 | YAML → JSON | [js-yaml](https://github.com/nodeca/js-yaml) CDN |
 | Regex Tester | Pure JS — live match highlighting against test input |

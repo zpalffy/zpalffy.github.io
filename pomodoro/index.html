@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomodoro Timer — Free Online Focus Timer</title>
+  <meta name="description" content="A clean Pomodoro timer with work and break intervals, sound alerts, and browser notifications. 100% client-side — no accounts, no tracking.">
+  <meta name="keywords" content="pomodoro timer, focus timer, productivity timer, work timer, break timer, pomodoro technique, online timer">
+  <meta name="author" content="zpalffy">
+  <link rel="canonical" href="https://zpalffy.github.io/pomodoro/">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#818cf8" media="(prefers-color-scheme: dark)">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="zpalffy">
+  <meta property="og:title" content="Pomodoro Timer — Free Online Focus Timer">
+  <meta property="og:description" content="A clean Pomodoro timer with work and break intervals, sound alerts, and browser notifications. 100% client-side.">
+  <meta property="og:url" content="https://zpalffy.github.io/pomodoro/">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Pomodoro Timer — Free Online Focus Timer">
+  <meta name="twitter:description" content="A clean Pomodoro timer with work and break intervals. 100% client-side — no accounts, no tracking.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Pomodoro Timer",
+    "url": "https://zpalffy.github.io/pomodoro/",
+    "description": "A clean Pomodoro timer with work and break intervals, sound alerts, and browser notifications. 100% client-side.",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>
+    :root {
+      --pico-font-size: 15px;
+      --pico-primary:           #4f46e5;
+      --pico-primary-hover:     #4338ca;
+      --pico-primary-focus:     rgba(79, 70, 229, 0.25);
+      --pico-primary-inverse:   #fff;
+      --pico-primary-underline: rgba(79, 70, 229, 0.5);
+      --color-work:  #4f46e5;
+      --color-break: #059669;
+      --phase-color: var(--color-work);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --pico-primary:           #818cf8;
+        --pico-primary-hover:     #a5b4fc;
+        --pico-primary-focus:     rgba(129, 140, 248, 0.25);
+        --pico-primary-inverse:   #1e1b4b;
+        --pico-primary-underline: rgba(129, 140, 248, 0.5);
+        --color-work:  #818cf8;
+        --color-break: #34d399;
+      }
+    }
+
+    body { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.75rem; padding: 1rem; }
+
+    .phase-label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.18em; color: var(--phase-color);
+      transition: color 0.4s;
+    }
+
+    .timer {
+      font-size: clamp(5rem, 20vw, 8rem);
+      font-family: var(--pico-font-family-monospace);
+      font-weight: 300;
+      line-height: 1;
+      color: var(--phase-color);
+      transition: color 0.4s;
+      letter-spacing: -0.02em;
+    }
+
+    .dots { display: flex; gap: 0.6rem; align-items: center; }
+    .dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--pico-muted-border-color);
+      transition: background 0.3s;
+    }
+    .dot.done { background: var(--phase-color); }
+
+    .controls { display: flex; gap: 0.75rem; }
+    .controls button { margin-bottom: 0; min-width: 7rem; }
+
+    .divider { width: 100%; max-width: 380px; border-top: 1px solid var(--pico-muted-border-color); }
+
+    .settings { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+    .settings .setting { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+    .settings .setting span { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pico-muted-color); }
+    .settings .setting .input-row { display: flex; align-items: center; gap: 0.3rem; }
+    .settings .setting input[type="number"] { width: 3.5rem; text-align: center; margin-bottom: 0; font-size: 0.875rem; padding: 0.3rem 0.4rem; }
+    .settings .setting .unit { font-size: 0.8rem; color: var(--pico-muted-color); }
+
+    .support-note {
+      background: color-mix(in srgb, var(--pico-primary) 10%, transparent);
+      border: 1px solid color-mix(in srgb, var(--pico-primary) 25%, transparent);
+      border-radius: 2rem;
+      padding: 0.5rem 1.25rem;
+    }
+    .support-note p { font-size: 0.875rem; margin: 0; text-align: center; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="container-fluid">
+      <ul>
+        <li><a href="../" class="secondary">← zpalffy</a></li>
+        <li><strong>Pomodoro Timer</strong></li>
+      </ul>
+      <ul>
+        <li><a href="https://ko-fi.com/zpalffy" target="_blank" rel="noopener noreferrer" role="button" class="outline secondary">☕ Tip Jar</a></li>
+        <li><a href="#" role="button" class="outline secondary" onclick="openAbout(); return false;">ⓘ About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="support-note">
+      <p>No ads, no accounts, no tracking — just a pomodoro timer. If it's useful, <a href="https://ko-fi.com/zpalffy" target="_blank" rel="noopener noreferrer">a small coffee tip ☕</a> is very much appreciated!</p>
+    </div>
+
+    <div class="phase-label" id="phase-label">Work</div>
+
+    <div class="timer" id="timer">25:00</div>
+
+    <div class="dots" id="dots">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+
+    <div class="controls">
+      <button id="btn-start" onclick="toggleTimer()">Start</button>
+      <button class="outline secondary" onclick="resetTimer()">Reset</button>
+      <button class="outline secondary" onclick="skipPhase()">Skip →</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="settings">
+      <div class="setting">
+        <span>Work</span>
+        <div class="input-row">
+          <input type="number" id="s-work" value="25" min="1" max="90" onchange="onSettingChange()">
+          <span class="unit">min</span>
+        </div>
+      </div>
+      <div class="setting">
+        <span>Short Break</span>
+        <div class="input-row">
+          <input type="number" id="s-short" value="5" min="1" max="30" onchange="onSettingChange()">
+          <span class="unit">min</span>
+        </div>
+      </div>
+      <div class="setting">
+        <span>Long Break</span>
+        <div class="input-row">
+          <input type="number" id="s-long" value="15" min="1" max="60" onchange="onSettingChange()">
+          <span class="unit">min</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <dialog id="about-modal">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" onclick="document.getElementById('about-modal').close()"></button>
+        <strong>About the Pomodoro Technique</strong>
+      </header>
+      <p>The Pomodoro Technique breaks work into focused intervals (traditionally 25 minutes) separated by short breaks. After four intervals, take a longer break.</p>
+      <p>Space bar to start/pause. Sound and browser notifications fire when each phase ends — notifications require a one-time permission prompt.</p>
+      <p>Everything runs in your browser. No accounts. No analytics. No tracking.</p>
+      <footer>
+        <button onclick="document.getElementById('about-modal').close()">Got it</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <script>
+    const DEFAULT_TITLE = document.title;
+
+    // State
+    let phase    = 'work';
+    let running  = false;
+    let remaining = 25 * 60;
+    let sessionsInCycle = 0;
+    let ticker   = null;
+    let audioCtx = null;
+
+    const PHASES = {
+      'work':        { label: 'Work',        setting: 's-work',  isWork: true },
+      'short-break': { label: 'Short Break', setting: 's-short', isWork: false },
+      'long-break':  { label: 'Long Break',  setting: 's-long',  isWork: false },
+    };
+
+    function getDuration(p) {
+      return parseInt(document.getElementById(PHASES[p].setting).value) * 60;
+    }
+
+    // Timer control
+    function toggleTimer() {
+      running ? pause() : start();
+    }
+
+    function start() {
+      initAudio();
+      requestNotifyPermission();
+      running = true;
+      ticker  = setInterval(tick, 1000);
+      updateControls();
+    }
+
+    function pause() {
+      running = false;
+      clearInterval(ticker);
+      ticker  = null;
+      updateControls();
+    }
+
+    function resetTimer() {
+      pause();
+      remaining = getDuration(phase);
+      updateDisplay();
+    }
+
+    function skipPhase() {
+      pause();
+      advance();
+    }
+
+    function tick() {
+      remaining--;
+      updateDisplay();
+      if (remaining <= 0) {
+        pause();
+        playChime(PHASES[phase].isWork);
+        sendNotification(PHASES[phase].isWork ? 'Time for a break!' : 'Back to work!');
+        advance();
+      }
+    }
+
+    function advance() {
+      if (phase === 'work') {
+        sessionsInCycle++;
+        phase = (sessionsInCycle % 4 === 0) ? 'long-break' : 'short-break';
+        if (sessionsInCycle >= 4) sessionsInCycle = 0;
+      } else {
+        phase = 'work';
+      }
+      remaining = getDuration(phase);
+      updateDisplay();
+      updatePhase();
+      updateDots();
+    }
+
+    function onSettingChange() {
+      if (!running) {
+        remaining = getDuration(phase);
+        updateDisplay();
+      }
+    }
+
+    // UI updates
+    function updateDisplay() {
+      const m   = String(Math.floor(remaining / 60)).padStart(2, '0');
+      const s   = String(remaining % 60).padStart(2, '0');
+      const str = `${m}:${s}`;
+      document.getElementById('timer').textContent = str;
+      document.title = running ? `${str} — ${PHASES[phase].label}` : DEFAULT_TITLE;
+    }
+
+    function updateControls() {
+      document.getElementById('btn-start').textContent = running ? 'Pause' : 'Start';
+      if (!running) document.title = DEFAULT_TITLE;
+    }
+
+    function updatePhase() {
+      document.getElementById('phase-label').textContent = PHASES[phase].label;
+      const color = PHASES[phase].isWork ? 'var(--color-work)' : 'var(--color-break)';
+      document.documentElement.style.setProperty('--phase-color', color);
+    }
+
+    function updateDots() {
+      document.querySelectorAll('.dot').forEach((dot, i) => {
+        dot.classList.toggle('done', i < sessionsInCycle);
+      });
+    }
+
+    // Audio (Web Audio API)
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function beep(freq, startOffset, duration) {
+      const osc  = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = audioCtx.currentTime + startOffset;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.25, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+      osc.start(t);
+      osc.stop(t + duration + 0.05);
+    }
+
+    function playChime(isWorkEnd) {
+      if (!audioCtx) return;
+      if (isWorkEnd) {
+        beep(523, 0,    0.25); // C5
+        beep(659, 0.3,  0.25); // E5
+        beep(784, 0.6,  0.45); // G5
+      } else {
+        beep(784, 0,    0.2);  // G5
+        beep(523, 0.28, 0.45); // C5
+      }
+    }
+
+    // Notifications
+    function requestNotifyPermission() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    function sendNotification(msg) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('Pomodoro Timer', { body: msg });
+      }
+    }
+
+    // Keyboard
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+        e.preventDefault();
+        toggleTimer();
+      }
+    });
+
+    function openAbout() {
+      document.getElementById('about-modal').showModal();
+    }
+
+    // Init
+    updateDisplay();
+    updatePhase();
+    updateDots();
+  </script>
+</body>
+</html>
