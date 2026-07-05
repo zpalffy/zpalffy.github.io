@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visited Countries Map — Free Online Tool</title>
+  <meta name="description" content="Click countries you've visited and color them in on a world map. Download a high-res PNG. 100% client-side — your data never leaves your device.">
+  <meta name="keywords" content="visited countries map, travel map maker, countries visited generator, world map colorer, places been map">
+  <meta name="author" content="zpalffy">
+  <link rel="canonical" href="https://zpalffy.github.io/world-map/">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#818cf8" media="(prefers-color-scheme: dark)">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="zpalffy">
+  <meta property="og:title" content="Visited Countries Map — Free Online Tool">
+  <meta property="og:description" content="Click countries you've visited and color them in on a world map. Download a high-res PNG. 100% client-side — your data never leaves your device.">
+  <meta property="og:url" content="https://zpalffy.github.io/world-map/">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Visited Countries Map — Free Online Tool">
+  <meta name="twitter:description" content="Click countries you've visited and color them in on a world map. 100% client-side — your data never leaves your device.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Visited Countries Map",
+    "url": "https://zpalffy.github.io/world-map/",
+    "description": "Click countries you've visited and color them in on a world map. Download a high-res PNG. 100% client-side.",
+    "applicationCategory": "DesignApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+  <style>
+    :root {
+      --pico-font-size: 15px;
+      --pico-primary:           #4f46e5;
+      --pico-primary-hover:     #4338ca;
+      --pico-primary-focus:     rgba(79, 70, 229, 0.25);
+      --pico-primary-inverse:   #fff;
+      --pico-primary-underline: rgba(79, 70, 229, 0.5);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --pico-primary:           #818cf8;
+        --pico-primary-hover:     #a5b4fc;
+        --pico-primary-focus:     rgba(129, 140, 248, 0.25);
+        --pico-primary-inverse:   #1e1b4b;
+        --pico-primary-underline: rgba(129, 140, 248, 0.5);
+      }
+    }
+
+    body { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+    main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 1rem; gap: 0.75rem; }
+
+    .actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .actions button { margin-bottom: 0; }
+    .actions label { font-size: 0.875rem; margin-bottom: 0; display: flex; align-items: center; gap: 0.4rem; }
+    .actions input[type="color"] { width: 2.5rem; height: 2.25rem; padding: 2px; margin-bottom: 0; cursor: pointer; }
+
+    .content { flex: 1; min-height: 0; display: flex; gap: 1rem; }
+
+    .sidebar { width: 220px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+    .sidebar input[type="search"] { margin-bottom: 0; }
+    #country-list {
+      list-style: none; margin: 0; padding: 0.25rem;
+      overflow-y: auto; flex: 1; min-height: 0;
+      border: var(--pico-border-width) solid var(--pico-form-element-border-color);
+      border-radius: var(--pico-border-radius);
+      background: var(--pico-form-element-background-color);
+    }
+    #country-list li { padding: 0; }
+    #country-list li.hidden { display: none; }
+    #country-list label {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.3rem 0.5rem; font-size: 0.8125rem; margin-bottom: 0;
+      cursor: pointer; border-radius: calc(var(--pico-border-radius) - 2px);
+    }
+    #country-list label:hover { background: color-mix(in srgb, var(--pico-primary) 10%, transparent); }
+    #country-list input[type="checkbox"] { margin: 0; }
+    #country-empty { padding: 0.5rem; font-size: 0.8125rem; color: var(--pico-muted-color); font-style: italic; }
+
+    .map-wrap {
+      flex: 1; min-height: 0;
+      border: var(--pico-border-width) solid var(--pico-form-element-border-color);
+      border-radius: var(--pico-border-radius);
+      background: var(--pico-form-element-background-color);
+      overflow: hidden;
+      position: relative;
+    }
+    #map { width: 100%; height: 100%; display: block; }
+    #map .country { stroke: var(--pico-form-element-border-color); stroke-width: 0.5; cursor: pointer; fill: #cbd5e1; transition: fill 0.1s; }
+    @media (prefers-color-scheme: dark) { #map .country { fill: #3f3f46; } }
+    #map .country:hover { fill-opacity: 0.75; }
+    #map .country.visited { fill: var(--visited-fill, #4f46e5); }
+    #map .country.visited:hover { fill-opacity: 1; }
+
+    #map-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--pico-muted-color); font-size: 0.875rem; font-style: italic; }
+
+    #status { font-size: 0.875rem; margin-left: 0.25rem; color: var(--pico-muted-color); }
+
+    @media (max-width: 700px) {
+      .content { flex-direction: column; }
+      .sidebar { width: auto; max-height: 35%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="container-fluid">
+      <ul>
+        <li><a href="../" class="secondary">← zpalffy</a></li>
+        <li><strong>Visited Countries Map</strong></li>
+      </ul>
+      <ul>
+        <li><a href="https://ko-fi.com/zpalffy" target="_blank" rel="noopener noreferrer" role="button" class="outline secondary">☕ Tip Jar</a></li>
+        <li><a href="#" role="button" class="outline secondary" onclick="openAbout(); return false;">ⓘ About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="actions">
+      <label for="color">Fill color <input type="color" id="color" value="#4f46e5"></label>
+      <button class="outline secondary" onclick="clearAll()">Clear all</button>
+      <button class="outline secondary" onclick="download()">Download PNG</button>
+      <span id="status"></span>
+    </div>
+    <div class="content">
+      <aside class="sidebar">
+        <input type="search" id="search" placeholder="Search countries…" autocomplete="off">
+        <ul id="country-list">
+          <li id="country-empty">Loading…</li>
+        </ul>
+      </aside>
+      <div class="map-wrap">
+        <svg id="map"></svg>
+        <span id="map-empty">Loading map…</span>
+      </div>
+    </div>
+  </main>
+
+  <dialog id="about-modal">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" onclick="document.getElementById('about-modal').close()"></button>
+        <strong>Privacy &amp; About</strong>
+      </header>
+      <p>Click a country to color it in — click again to remove it. Pick any color and download a PNG when you're done.</p>
+      <p>Your selections are saved locally in your browser (<code>localStorage</code>) so they're still here next time. Nothing is ever sent to a server.</p>
+      <p>No accounts. No analytics. No tracking. No cookies.</p>
+      <footer>
+        <button onclick="document.getElementById('about-modal').close()">Got it</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <script>
+    const STORAGE_KEY = 'world-map-visited';
+    const COLOR_KEY = 'world-map-color';
+
+    const svg = d3.select('#map');
+    const emptyEl = document.getElementById('map-empty');
+    const statusEl = document.getElementById('status');
+    const colorInput = document.getElementById('color');
+    const listEl = document.getElementById('country-list');
+    const searchEl = document.getElementById('search');
+
+    let visited = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+    colorInput.value = localStorage.getItem(COLOR_KEY) || '#4f46e5';
+
+    let countryPaths = null;
+    const checkboxesById = new Map();
+
+    function applyStyles() {
+      document.documentElement.style.setProperty('--visited-fill', colorInput.value);
+      countryPaths.classed('visited', d => visited.has(String(d.id)));
+      checkboxesById.forEach((checkbox, id) => { checkbox.checked = visited.has(id); });
+      setStatus(`${visited.size} ${visited.size === 1 ? 'country' : 'countries'} colored`);
+    }
+
+    function toggleCountry(id) {
+      id = String(id);
+      if (visited.has(id)) visited.delete(id);
+      else visited.add(id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...visited]));
+      applyStyles();
+    }
+
+    function clearAll() {
+      visited.clear();
+      localStorage.setItem(STORAGE_KEY, '[]');
+      applyStyles();
+    }
+
+    colorInput.addEventListener('input', () => {
+      localStorage.setItem(COLOR_KEY, colorInput.value);
+      applyStyles();
+    });
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+    }
+
+    const EXPORT_BASE_FILL = '#cbd5e1';
+    const EXPORT_STROKE = '#94a3b8';
+
+    function download() {
+      const wrap = document.querySelector('.map-wrap');
+      const scale = 2;
+      const width = wrap.clientWidth * scale;
+      const height = wrap.clientHeight * scale;
+
+      // The clone is serialized outside the document, so it can't see the page's
+      // external stylesheet (the .country/.visited classes and --visited-fill var
+      // would resolve to nothing, leaving SVG's default black fill). Bake the
+      // actual colors in as explicit attributes instead.
+      const clone = svg.node().cloneNode(true);
+      clone.setAttribute('width', width);
+      clone.setAttribute('height', height);
+      d3.select(clone).selectAll('path.country')
+        .attr('fill', function () {
+          return this.classList.contains('visited') ? colorInput.value : EXPORT_BASE_FILL;
+        })
+        .attr('stroke', EXPORT_STROKE)
+        .attr('stroke-width', 0.5);
+
+      const xml = new XMLSerializer().serializeToString(clone);
+      const svgBlob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        URL.revokeObjectURL(url);
+
+        const a = document.createElement('a');
+        a.download = 'visited-countries.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      };
+      img.src = url;
+    }
+
+    function openAbout() {
+      document.getElementById('about-modal').showModal();
+    }
+
+    function buildList(countries) {
+      const sorted = [...countries.features].sort((a, b) => a.properties.name.localeCompare(b.properties.name));
+
+      listEl.innerHTML = '';
+      sorted.forEach(d => {
+        const id = String(d.id);
+        const li = document.createElement('li');
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.addEventListener('change', () => toggleCountry(id));
+        label.appendChild(checkbox);
+        label.append(d.properties.name);
+        li.appendChild(label);
+        listEl.appendChild(li);
+        checkboxesById.set(id, checkbox);
+        li.dataset.name = d.properties.name.toLowerCase();
+      });
+    }
+
+    searchEl.addEventListener('input', () => {
+      const q = searchEl.value.trim().toLowerCase();
+      listEl.querySelectorAll('li').forEach(li => {
+        li.classList.toggle('hidden', q.length > 0 && !li.dataset.name.includes(q));
+      });
+    });
+
+    function render(width, height, countries) {
+      const projection = d3.geoNaturalEarth1().fitSize([width, height], countries);
+      const path = d3.geoPath(projection);
+
+      svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+      countryPaths = svg.selectAll('path.country')
+        .data(countries.features)
+        .join('path')
+        .attr('class', 'country')
+        .attr('d', path)
+        .on('click', (event, d) => toggleCountry(d.id));
+
+      countryPaths.append('title').text(d => d.properties.name);
+
+      buildList(countries);
+      applyStyles();
+    }
+
+    async function init() {
+      try {
+        const wrap = document.querySelector('.map-wrap');
+        const width = wrap.clientWidth;
+        const height = wrap.clientHeight;
+
+        const topology = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+        const countries = topojson.feature(topology, topology.objects.countries);
+
+        emptyEl.remove();
+        render(width, height, countries);
+      } catch (err) {
+        emptyEl.textContent = 'Failed to load map data. Check your connection and reload.';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
