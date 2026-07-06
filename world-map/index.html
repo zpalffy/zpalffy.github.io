@@ -107,6 +107,23 @@
 
     #map-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--pico-muted-color); font-size: 0.875rem; font-style: italic; }
 
+    #tooltip {
+      position: absolute; left: 0; top: 0;
+      pointer-events: none;
+      background: rgba(15, 23, 42, 0.92);
+      color: #fff;
+      padding: 0.25rem 0.6rem;
+      border-radius: calc(var(--pico-border-radius) - 2px);
+      font-size: 0.8125rem;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateX(-50%);
+      transition: opacity 0.08s;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    #tooltip.visible { opacity: 1; }
+
     #status { font-size: 0.875rem; margin-left: 0.25rem; color: var(--pico-muted-color); }
 
     @media (max-width: 700px) {
@@ -146,6 +163,7 @@
       <div class="map-wrap">
         <svg id="map"></svg>
         <span id="map-empty">Loading map…</span>
+        <div id="tooltip"></div>
       </div>
     </div>
   </main>
@@ -175,6 +193,8 @@
     const colorInput = document.getElementById('color');
     const listEl = document.getElementById('country-list');
     const searchEl = document.getElementById('search');
+    const tooltipEl = document.getElementById('tooltip');
+    const mapWrapEl = document.querySelector('.map-wrap');
 
     let visited = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
     colorInput.value = localStorage.getItem(COLOR_KEY) || '#4f46e5';
@@ -258,6 +278,29 @@
       img.src = url;
     }
 
+    function showTooltip(event, name) {
+      tooltipEl.textContent = name;
+      tooltipEl.classList.add('visible');
+
+      const rect = mapWrapEl.getBoundingClientRect();
+      const tw = tooltipEl.offsetWidth;
+      const th = tooltipEl.offsetHeight;
+
+      let x = event.clientX - rect.left;
+      let y = event.clientY - rect.top;
+      x = Math.min(Math.max(x, tw / 2 + 4), rect.width - tw / 2 - 4);
+
+      let top = y - th - 12;
+      if (top < 4) top = y + 16; // flip below the cursor if too close to the top edge
+
+      tooltipEl.style.left = `${x}px`;
+      tooltipEl.style.top = `${top}px`;
+    }
+
+    function hideTooltip() {
+      tooltipEl.classList.remove('visible');
+    }
+
     function openAbout() {
       document.getElementById('about-modal').showModal();
     }
@@ -300,9 +343,10 @@
         .join('path')
         .attr('class', 'country')
         .attr('d', path)
-        .on('click', (event, d) => toggleCountry(d.id));
-
-      countryPaths.append('title').text(d => d.properties.name);
+        .attr('data-name', d => d.properties.name)
+        .on('click', (event, d) => toggleCountry(d.id))
+        .on('mousemove', (event, d) => showTooltip(event, d.properties.name))
+        .on('mouseleave', hideTooltip);
 
       buildList(countries);
       applyStyles();
