@@ -162,16 +162,7 @@
     <div class="actions">
       <label for="color">Fill color <input type="color" id="color" disabled></label>
       <button id="clear-btn" class="outline secondary" onclick="clearAll()" disabled>Clear all</button>
-      <label for="export-size">Size
-        <select id="export-size" disabled>
-          <option value="current">Current view</option>
-          <option value="1920x1080">Desktop (1920×1080)</option>
-          <option value="3840x2160">Desktop 4K (3840×2160)</option>
-          <option value="3000x2400">Print 8×10in @300dpi (3000×2400)</option>
-          <option value="6000x4800">Print 16×20in @300dpi (6000×4800)</option>
-        </select>
-      </label>
-      <button id="download-btn" class="outline secondary" onclick="download()" disabled>Download PNG</button>
+      <button id="download-btn" class="outline secondary" onclick="openDownloadModal()" disabled>Download PNG</button>
       <span id="status"></span>
     </div>
     <div class="content">
@@ -191,6 +182,28 @@
       </div>
     </div>
   </main>
+
+  <dialog id="download-modal">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" onclick="document.getElementById('download-modal').close()"></button>
+        <strong>Download PNG</strong>
+      </header>
+      <label for="export-size">Size
+        <select id="export-size">
+          <option value="current">Current view</option>
+          <option value="1920x1080">Desktop (1920×1080)</option>
+          <option value="3840x2160">Desktop 4K (3840×2160)</option>
+          <option value="3000x2400">Print 8×10in @300dpi (3000×2400)</option>
+          <option value="6000x4800">Print 16×20in @300dpi (6000×4800)</option>
+        </select>
+      </label>
+      <footer>
+        <button class="secondary" onclick="document.getElementById('download-modal').close()">Cancel</button>
+        <button onclick="confirmDownload()">Download</button>
+      </footer>
+    </article>
+  </dialog>
 
   <dialog id="about-modal">
     <article>
@@ -365,6 +378,15 @@
       document.getElementById('about-modal').showModal();
     }
 
+    function openDownloadModal() {
+      document.getElementById('download-modal').showModal();
+    }
+
+    function confirmDownload() {
+      download();
+      document.getElementById('download-modal').close();
+    }
+
     function buildList(countries) {
       const sorted = [...countries.features].sort((a, b) => a.properties.name.localeCompare(b.properties.name));
 
@@ -440,7 +462,6 @@
       clearBtnEl.disabled = !enabled;
       downloadBtnEl.disabled = !enabled;
       searchEl.disabled = !enabled;
-      exportSizeEl.disabled = !enabled;
     }
 
     async function init() {
