@@ -67,7 +67,6 @@
     .actions button { margin-bottom: 0; }
     .actions label { font-size: 0.875rem; margin-bottom: 0; display: flex; align-items: center; gap: 0.4rem; }
     .actions input[type="color"] { width: 2.5rem; height: 2.25rem; padding: 2px; margin-bottom: 0; cursor: pointer; }
-    .actions select { width: auto; margin-bottom: 0; }
 
     .content { flex: 1; min-height: 0; display: flex; gap: 1rem; }
 
@@ -191,12 +190,18 @@
       </header>
       <label for="export-size">Format
         <select id="export-size">
-          <option value="current">Current view (PNG)</option>
-          <option value="1920x1080">Desktop (1920×1080)</option>
-          <option value="3840x2160">Desktop 4K (3840×2160)</option>
-          <option value="3000x2400">Print 8×10in @300dpi (3000×2400)</option>
-          <option value="6000x4800">Print 16×20in @300dpi (6000×4800)</option>
-          <option value="svg">SVG (vector)</option>
+          <optgroup label="Screen (PNG)">
+            <option value="current">Current view</option>
+            <option value="1920x1080">Desktop — 1920×1080</option>
+            <option value="3840x2160">Desktop 4K — 3840×2160</option>
+          </optgroup>
+          <optgroup label="Print (PNG, 300 DPI)">
+            <option value="3000x2400">8×10 in — 3000×2400</option>
+            <option value="6000x4800">16×20 in — 6000×4800</option>
+          </optgroup>
+          <optgroup label="Vector">
+            <option value="svg">SVG — any size</option>
+          </optgroup>
         </select>
       </label>
       <footer>
