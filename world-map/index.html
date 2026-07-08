@@ -320,13 +320,11 @@
       tooltipEl.textContent = name;
       tooltipEl.classList.add('visible');
 
-      const rect = mapWrapEl.getBoundingClientRect();
       const tw = tooltipEl.offsetWidth;
       const th = tooltipEl.offsetHeight;
 
-      let x = event.clientX - rect.left;
-      let y = event.clientY - rect.top;
-      x = Math.min(Math.max(x, tw / 2 + 4), rect.width - tw / 2 - 4);
+      let [x, y] = d3.pointer(event, mapWrapEl);
+      x = Math.min(Math.max(x, tw / 2 + 4), mapWrapEl.clientWidth - tw / 2 - 4);
 
       let top = y - th - 12;
       if (top < 4) top = y + 16; // flip below the cursor if too close to the top edge
