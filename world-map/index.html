@@ -259,14 +259,22 @@
       statusEl.textContent = msg;
     }
 
-    const EXPORT_BASE_FILL = '#cbd5e1';
-    const EXPORT_STROKE = '#94a3b8';
-
     function download() {
-      const wrap = document.querySelector('.map-wrap');
       const scale = 2;
-      const width = wrap.clientWidth * scale;
-      const height = wrap.clientHeight * scale;
+      const width = mapWrapEl.clientWidth * scale;
+      const height = mapWrapEl.clientHeight * scale;
+
+      // Read the live theme's colors instead of hardcoding them, so the export
+      // matches whatever the user is actually looking at (including dark mode)
+      // and never drifts from the on-screen CSS.
+      const anyPath = svg.select('path.country').node();
+      const unvisitedPath = svg.select('path.country:not(.visited)').node();
+      const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+      const baseStroke = anyPath ? getComputedStyle(anyPath).stroke : '#94a3b8';
+      const baseFill = unvisitedPath
+        ? getComputedStyle(unvisitedPath).fill
+        : (isDark ? '#3f3f46' : '#cbd5e1'); // fallback for the edge case where every country is selected
+      const backgroundColor = getComputedStyle(document.documentElement).backgroundColor;
 
       // The clone is serialized outside the document, so it can't see the page's
       // external stylesheet (the .country/.visited classes and --visited-fill var
@@ -277,9 +285,9 @@
       clone.setAttribute('height', height);
       d3.select(clone).selectAll('path.country')
         .attr('fill', function () {
-          return this.classList.contains('visited') ? colorInput.value : EXPORT_BASE_FILL;
+          return this.classList.contains('visited') ? colorInput.value : baseFill;
         })
-        .attr('stroke', EXPORT_STROKE)
+        .attr('stroke', baseStroke)
         .attr('stroke-width', 0.5);
 
       const xml = new XMLSerializer().serializeToString(clone);
@@ -292,7 +300,7 @@
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = backgroundColor;
         ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
         URL.revokeObjectURL(url);
