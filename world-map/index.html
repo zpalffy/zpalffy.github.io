@@ -71,7 +71,18 @@
     .content { flex: 1; min-height: 0; display: flex; gap: 1rem; }
 
     .sidebar { width: 220px; flex-shrink: 0; display: flex; flex-direction: column; gap: 0.5rem; }
-    .sidebar input[type="search"] { margin-bottom: 0; }
+    .search-wrap { position: relative; }
+    .search-wrap input[type="search"] { margin-bottom: 0; padding-right: 1.75rem; }
+    .search-wrap input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+    #search-clear {
+      position: absolute; top: 50%; right: 0.4rem; transform: translateY(-50%);
+      width: 1.25rem; height: 1.25rem; padding: 0; margin: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; border-radius: 50%;
+      color: var(--pico-muted-color); font-size: 1rem; line-height: 1; cursor: pointer;
+    }
+    #search-clear:hover { background: color-mix(in srgb, var(--pico-primary) 15%, transparent); color: var(--pico-color); }
+    #search-clear[hidden] { display: none; }
     #country-list {
       list-style: none; margin: 0; padding: 0.25rem;
       overflow-y: auto; flex: 1; min-height: 0;
@@ -155,7 +166,10 @@
     </div>
     <div class="content">
       <aside class="sidebar">
-        <input type="search" id="search" placeholder="Search countries…" autocomplete="off">
+        <div class="search-wrap">
+          <input type="search" id="search" placeholder="Search countries…" autocomplete="off">
+          <button type="button" id="search-clear" aria-label="Clear search" hidden>&times;</button>
+        </div>
         <ul id="country-list">
           <li id="country-empty">Loading…</li>
         </ul>
@@ -193,6 +207,7 @@
     const colorInput = document.getElementById('color');
     const listEl = document.getElementById('country-list');
     const searchEl = document.getElementById('search');
+    const searchClearEl = document.getElementById('search-clear');
     const tooltipEl = document.getElementById('tooltip');
     const mapWrapEl = document.querySelector('.map-wrap');
 
@@ -206,7 +221,7 @@
       document.documentElement.style.setProperty('--visited-fill', colorInput.value);
       countryPaths.classed('visited', d => visited.has(String(d.id)));
       checkboxesById.forEach((checkbox, id) => { checkbox.checked = visited.has(id); });
-      setStatus(`${visited.size} ${visited.size === 1 ? 'country' : 'countries'} colored`);
+      setStatus(`${visited.size} ${visited.size === 1 ? 'country' : 'countries'} selected`);
     }
 
     function toggleCountry(id) {
@@ -219,7 +234,7 @@
 
     function clearAll() {
       if (visited.size === 0) return;
-      if (!confirm(`Clear all ${visited.size} colored ${visited.size === 1 ? 'country' : 'countries'}?`)) return;
+      if (!confirm(`Clear all ${visited.size} selected ${visited.size === 1 ? 'country' : 'countries'}?`)) return;
       visited.clear();
       localStorage.setItem(STORAGE_KEY, '[]');
       applyStyles();
@@ -332,6 +347,13 @@
       listEl.querySelectorAll('li').forEach(li => {
         li.classList.toggle('hidden', q.length > 0 && !li.dataset.name.includes(q));
       });
+      searchClearEl.hidden = searchEl.value.length === 0;
+    });
+
+    searchClearEl.addEventListener('click', () => {
+      searchEl.value = '';
+      searchEl.dispatchEvent(new Event('input'));
+      searchEl.focus();
     });
 
     function render(width, height, countries) {
