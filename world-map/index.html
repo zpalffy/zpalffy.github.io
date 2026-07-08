@@ -225,6 +225,9 @@
     colorInput.value = localStorage.getItem(COLOR_KEY) || '#4f46e5';
 
     let countryPaths = null;
+    let projection = null;
+    let pathGenerator = null;
+    let countriesData = null;
     const checkboxesById = new Map();
 
     function applyStyles() {
@@ -375,8 +378,9 @@
     });
 
     function render(width, height, countries) {
-      const projection = d3.geoNaturalEarth1().fitSize([width, height], countries);
-      const path = d3.geoPath(projection);
+      countriesData = countries;
+      projection = d3.geoNaturalEarth1().fitSize([width, height], countries);
+      pathGenerator = d3.geoPath(projection);
 
       svg.attr('viewBox', `0 0 ${width} ${height}`);
 
@@ -384,7 +388,7 @@
         .data(countries.features)
         .join('path')
         .attr('class', 'country')
-        .attr('d', path)
+        .attr('d', pathGenerator)
         .attr('data-name', d => d.properties.name)
         .on('click', (event, d) => toggleCountry(d.id))
         .on('mousemove', (event, d) => showTooltip(event, d.properties.name))
@@ -393,6 +397,21 @@
       buildList(countries);
       applyStyles();
     }
+
+    function updateProjection() {
+      if (!countryPaths) return;
+      const width = mapWrapEl.clientWidth;
+      const height = mapWrapEl.clientHeight;
+      svg.attr('viewBox', `0 0 ${width} ${height}`);
+      projection.fitSize([width, height], countriesData);
+      countryPaths.attr('d', pathGenerator);
+    }
+
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(updateProjection, 200);
+    });
 
     function setControlsEnabled(enabled) {
       colorInput.disabled = !enabled;
