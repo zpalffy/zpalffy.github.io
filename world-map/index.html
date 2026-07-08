@@ -230,11 +230,15 @@
     let countriesData = null;
     const checkboxesById = new Map();
 
+    function pluralize(n, singular, plural) {
+      return `${n} ${n === 1 ? singular : plural}`;
+    }
+
     function applyStyles() {
       document.documentElement.style.setProperty('--visited-fill', colorInput.value);
       countryPaths.classed('visited', d => visited.has(String(d.id)));
       checkboxesById.forEach((checkbox, id) => { checkbox.checked = visited.has(id); });
-      setStatus(`${visited.size} ${visited.size === 1 ? 'country' : 'countries'} selected`);
+      setStatus(`${pluralize(visited.size, 'country', 'countries')} selected`);
     }
 
     function toggleCountry(id) {
@@ -247,7 +251,7 @@
 
     function clearAll() {
       if (visited.size === 0) return;
-      if (!confirm(`Clear all ${visited.size} selected ${visited.size === 1 ? 'country' : 'countries'}?`)) return;
+      if (!confirm(`Clear all ${pluralize(visited.size, 'selected country', 'selected countries')}?`)) return;
       visited.clear();
       localStorage.setItem(STORAGE_KEY, '[]');
       applyStyles();
