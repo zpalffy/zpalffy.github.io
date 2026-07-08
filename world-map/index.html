@@ -159,15 +159,15 @@
 
   <main>
     <div class="actions">
-      <label for="color">Fill color <input type="color" id="color" value="#4f46e5"></label>
-      <button class="outline secondary" onclick="clearAll()">Clear all</button>
-      <button class="outline secondary" onclick="download()">Download PNG</button>
+      <label for="color">Fill color <input type="color" id="color" value="#4f46e5" disabled></label>
+      <button id="clear-btn" class="outline secondary" onclick="clearAll()" disabled>Clear all</button>
+      <button id="download-btn" class="outline secondary" onclick="download()" disabled>Download PNG</button>
       <span id="status"></span>
     </div>
     <div class="content">
       <aside class="sidebar">
         <div class="search-wrap">
-          <input type="search" id="search" placeholder="Search countries…" autocomplete="off">
+          <input type="search" id="search" placeholder="Search countries…" autocomplete="off" disabled>
           <button type="button" id="search-clear" aria-label="Clear search" hidden>&times;</button>
         </div>
         <ul id="country-list">
@@ -208,6 +208,8 @@
     const listEl = document.getElementById('country-list');
     const searchEl = document.getElementById('search');
     const searchClearEl = document.getElementById('search-clear');
+    const clearBtnEl = document.getElementById('clear-btn');
+    const downloadBtnEl = document.getElementById('download-btn');
     const tooltipEl = document.getElementById('tooltip');
     const mapWrapEl = document.querySelector('.map-wrap');
 
@@ -384,6 +386,13 @@
       applyStyles();
     }
 
+    function setControlsEnabled(enabled) {
+      colorInput.disabled = !enabled;
+      clearBtnEl.disabled = !enabled;
+      downloadBtnEl.disabled = !enabled;
+      searchEl.disabled = !enabled;
+    }
+
     async function init() {
       try {
         const wrap = document.querySelector('.map-wrap');
@@ -395,6 +404,7 @@
 
         emptyEl.remove();
         render(width, height, countries);
+        setControlsEnabled(true);
       } catch (err) {
         emptyEl.textContent = 'Failed to load map data. Check your connection and reload.';
       }
