@@ -328,6 +328,10 @@
         .attr('width', width)
         .attr('height', height)
         .attr('viewBox', `0 0 ${width} ${height}`);
+      exportSvg.append('rect')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', backgroundColor);
       exportSvg.selectAll('path')
         .data(countriesData.features)
         .join('path')
@@ -355,8 +359,6 @@
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = backgroundColor;
-        ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
         URL.revokeObjectURL(url);
 
