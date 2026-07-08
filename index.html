@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>zpalffy — Free Browser-Based Tools &amp; Games</title>
   <meta name="description" content="Free browser-based developer tools and games by zpalffy. Everything runs client-side — your data never leaves your device. No accounts, no tracking.">
-  <meta name="keywords" content="browser tools, online developer tools, client-side tools, JSON formatter, JWT decoder, base64 encoder decoder, URL encoder decoder, free web tools, browser games">
+  <meta name="keywords" content="browser tools, online developer tools, client-side tools, JSON formatter, JWT decoder, base64 encoder decoder, URL encoder decoder, free web tools, browser games, flash cards, flashcard maker">
   <meta name="author" content="zpalffy">
   <link rel="canonical" href="https://zpalffy.github.io/">
   <meta name="robots" content="index, follow">
@@ -123,6 +123,13 @@
             "name": "Country Map",
             "description": "Click countries you've visited and color them in on a world map. Download a high-res PNG. 100% client-side.",
             "url": "https://zpalffy.github.io/world-map/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 13,
+            "name": "Flash Cards",
+            "description": "Create and study flash card decks right in your browser. 100% client-side.",
+            "url": "https://zpalffy.github.io/flashcards/"
           }
         ]
       }
@@ -193,6 +200,7 @@
     article.c-purple  { --card-color: #9333ea; }
     article.c-lime    { --card-color: #65a30d; }
     article.c-fuchsia { --card-color: #c026d3; }
+    article.c-rose    { --card-color: #e11d48; }
     @media (prefers-color-scheme: dark) {
       article.c-orange  { --card-color: #fb923c; }
       article.c-teal    { --card-color: #2dd4bf; }
@@ -206,6 +214,7 @@
       article.c-purple  { --card-color: #c084fc; }
       article.c-lime    { --card-color: #84cc16; }
       article.c-fuchsia { --card-color: #e879f9; }
+      article.c-rose    { --card-color: #fb7185; }
     }
   </style>
 </head>
@@ -328,6 +337,14 @@
             <hgroup>
               <h3>Country Map →</h3>
               <p>Click countries you've visited and color them in. Download a high-res PNG.</p>
+            </hgroup>
+          </article>
+        </a>
+        <a class="card-link" href="flashcards/">
+          <article class="tool-card c-rose">
+            <hgroup>
+              <h3>Flash Cards →</h3>
+              <p>Create decks and study with flip animations. Saved right in your browser.</p>
             </hgroup>
           </article>
         </a>

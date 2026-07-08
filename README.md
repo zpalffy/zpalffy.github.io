@@ -22,6 +22,7 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 | [Unix Timestamp Converter](https://zpalffy.github.io/timestamp/) | Convert epoch timestamps to human-readable dates and back; live relative time |
 | [CSV → JSON Converter](https://zpalffy.github.io/csv/) | Convert CSV to JSON or browse as a table; auto-detects delimiters and headers |
 | [Country Map](https://zpalffy.github.io/world-map/) | Click countries you've visited and color them in on a world map; download as PNG |
+| [Flash Cards](https://zpalffy.github.io/flashcards/) | Create flash card decks and study them with flip animations; saved locally |
 
 ## Tech
 
@@ -39,9 +40,3 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 |------|-------|
 | Cron Builder / Explainer | [cronstrue](https://github.com/bradymholt/cronstrue) CDN for explain direction; pure JS visual builder for reverse (pick schedule → get expression) |
 | Diff Viewer | [diff2html](https://diff2html.xyz/) CDN — paste two blocks, see a diff |
-
-### Games
-
-| Idea | Notes |
-|------|-------|
-| Flash Cards | localStorage for card decks, flip animation |

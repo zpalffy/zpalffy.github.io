@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studying — Flash Cards</title>
+  <meta name="robots" content="noindex, follow">
+  <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#818cf8" media="(prefers-color-scheme: dark)">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css">
+  <style>
+    :root {
+      --pico-font-size: 15px;
+      --pico-primary:           #4f46e5;
+      --pico-primary-hover:     #4338ca;
+      --pico-primary-focus:     rgba(79, 70, 229, 0.25);
+      --pico-primary-inverse:   #fff;
+      --pico-primary-underline: rgba(79, 70, 229, 0.5);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --pico-primary:           #818cf8;
+        --pico-primary-hover:     #a5b4fc;
+        --pico-primary-focus:     rgba(129, 140, 248, 0.25);
+        --pico-primary-inverse:   #1e1b4b;
+        --pico-primary-underline: rgba(129, 140, 248, 0.5);
+      }
+    }
+
+    main { padding: 1rem; max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.25rem; }
+
+    .session-header { width: 100%; }
+    .session-header .back-link { font-size: 0.875rem; }
+    .session-header h1 { font-size: 1.25rem; margin: 0.35rem 0 0.6rem; }
+    .session-header progress { width: 100%; margin-bottom: 0.25rem; }
+    .session-header .progress-label { font-size: 0.8125rem; color: var(--pico-muted-color); }
+    .side-toggle {
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8125rem; color: var(--pico-muted-color);
+      margin-bottom: 0.75rem; cursor: pointer;
+    }
+    .side-toggle input { margin: 0; }
+
+    .flip-card {
+      width: min(90vw, 480px);
+      height: min(55vw, 280px);
+      perspective: 1200px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .flip-card-inner {
+      position: relative; width: 100%; height: 100%;
+      transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+
+    @keyframes card-enter {
+      from { opacity: 0; transform: translateX(28px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .flip-card.card-enter { animation: card-enter 0.32s ease-out; }
+    @media (prefers-reduced-motion: reduce) {
+      .flip-card.card-enter { animation: none; }
+    }
+
+    .flip-card-face {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 1.5rem;
+      backface-visibility: hidden;
+      border-radius: var(--pico-border-radius);
+      border: var(--pico-border-width) solid var(--pico-form-element-border-color);
+      background: var(--pico-form-element-background-color);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      font-size: 1.375rem;
+      overflow-y: auto;
+    }
+    .flip-card-back { transform: rotateY(180deg); }
+
+    .hint-text { font-size: 0.8125rem; color: var(--pico-muted-color); font-style: italic; min-height: 1.2em; }
+
+    .grade-buttons { display: flex; gap: 0.75rem; visibility: hidden; }
+    .grade-buttons.visible { visibility: visible; }
+    .grade-buttons button { margin-bottom: 0; min-width: 130px; }
+    #missed-btn { background: transparent; border-color: #dc2626; color: #dc2626; }
+    #missed-btn:hover { background: color-mix(in srgb, #dc2626 10%, transparent); }
+    #got-it-btn { background: #16a34a; border-color: #16a34a; }
+    #got-it-btn:hover { background: #15803d; border-color: #15803d; }
+
+    #complete-view, #error-view { text-align: center; padding: 2rem 1rem; }
+    #complete-view .actions, #error-view .actions { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="container-fluid">
+      <ul>
+        <li><a href="index.html" class="secondary">← Decks</a></li>
+        <li><strong>Flash Cards</strong></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div id="error-view" hidden>
+      <p id="error-message"></p>
+      <div class="actions">
+        <a href="index.html" role="button">← Back to decks</a>
+      </div>
+    </div>
+
+    <div id="study-view" hidden>
+      <div class="session-header">
+        <a href="index.html" class="back-link secondary">← Decks</a>
+        <h1 id="deck-title"></h1>
+        <label class="side-toggle">
+          <input type="checkbox" role="switch" id="randomize-side-toggle">
+          Mix which side comes up first
+        </label>
+        <progress id="progress-bar" value="0" max="1"></progress>
+        <div class="progress-label" id="progress-label"></div>
+      </div>
+
+      <div class="flip-card" id="flip-card">
+        <div class="flip-card-inner" id="flip-card-inner">
+          <div class="flip-card-face flip-card-front" id="card-front"></div>
+          <div class="flip-card-face flip-card-back" id="card-back"></div>
+        </div>
+      </div>
+
+      <div class="hint-text" id="hint-text">Tap the card or press Space to flip</div>
+
+      <div class="grade-buttons" id="grade-buttons">
+        <button id="missed-btn">✗ Missed it</button>
+        <button id="got-it-btn">✓ Got it</button>
+      </div>
+    </div>
+
+    <div id="complete-view" hidden>
+      <h1>🎉 Nice work!</h1>
+      <p id="complete-message"></p>
+      <div class="actions">
+        <button class="secondary" onclick="startSession()">Study again</button>
+        <a href="index.html" role="button" class="outline">← Back to decks</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = 'flashcards-decks';
+
+    let deck = null;
+    let queue = [];
+    let mastered = new Set();
+    let missedOnce = new Set();
+    let flipped = false;
+    let directions = {}; // card index -> true if showing side B first this session
+
+    function loadDecks() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        return Array.isArray(raw) ? raw : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function showError(message) {
+      document.getElementById('error-message').textContent = message;
+      document.getElementById('error-view').hidden = false;
+    }
+
+    function init() {
+      const params = new URLSearchParams(location.search);
+      const deckId = params.get('deck');
+      const decks = loadDecks();
+      const found = decks.find(d => d.id === deckId) || null;
+
+      if (!found) {
+        showError('That deck could not be found.');
+        return;
+      }
+
+      // Only cards with both sides filled in are studyable — skip blank
+      // or half-finished (WIP) cards rather than showing an empty answer.
+      const studyableCards = found.cards.filter(c => (c[0] || '').trim() && (c[1] || '').trim());
+      deck = { ...found, cards: studyableCards };
+
+      if (deck.cards.length === 0) {
+        showError(`"${deck.name}" doesn't have any complete cards to study yet.`);
+        return;
+      }
+
+      document.getElementById('study-view').hidden = false;
+      document.getElementById('deck-title').textContent = deck.name;
+      startSession();
+    }
+
+    function startSession() {
+      queue = shuffle(deck.cards.map((_, i) => i));
+      mastered = new Set();
+      missedOnce = new Set();
+      flipped = false;
+
+      // Decide each card's direction once per session so a requeued
+      // (missed) card keeps showing the same side first when it reappears.
+      const randomizeSide = document.getElementById('randomize-side-toggle').checked;
+      directions = {};
+      deck.cards.forEach((_, i) => {
+        directions[i] = randomizeSide && Math.random() < 0.5;
+      });
+
+      document.getElementById('complete-view').hidden = true;
+      document.getElementById('study-view').hidden = false;
+      renderCard();
+    }
+
+    function renderCard() {
+      if (queue.length === 0) {
+        showComplete();
+        return;
+      }
+
+      flipped = false;
+      const card = document.getElementById('flip-card');
+      const inner = document.getElementById('flip-card-inner');
+
+      // Snap back instantly (no transition) so the outgoing answer face
+      // is never briefly visible while rotating past it on the way back.
+      inner.style.transition = 'none';
+      card.classList.remove('flipped');
+
+      const index = queue[0];
+      const [sideA, sideB] = deck.cards[index];
+      const reversed = directions[index];
+      document.getElementById('card-front').textContent = (reversed ? sideB : sideA) || '';
+      document.getElementById('card-back').textContent = (reversed ? sideA : sideB) || '';
+
+      void inner.offsetHeight; // force reflow to lock in the instant snap
+      inner.style.transition = '';
+
+      // Restart the slide-in entrance animation for the new card.
+      card.classList.remove('card-enter');
+      void card.offsetWidth;
+      card.classList.add('card-enter');
+
+      document.getElementById('hint-text').textContent = 'Tap the card or press Space to flip';
+      document.getElementById('grade-buttons').classList.remove('visible');
+
+      document.getElementById('progress-bar').max = deck.cards.length;
+      document.getElementById('progress-bar').value = mastered.size;
+      document.getElementById('progress-label').textContent =
+        `${mastered.size} / ${deck.cards.length} mastered`;
+    }
+
+    function flipCard() {
+      if (flipped) return;
+      flipped = true;
+      document.getElementById('flip-card').classList.add('flipped');
+      document.getElementById('hint-text').textContent = '';
+      document.getElementById('grade-buttons').classList.add('visible');
+    }
+
+    function grade(gotIt) {
+      if (!flipped) return;
+      const index = queue.shift();
+      if (gotIt) {
+        mastered.add(index);
+      } else {
+        missedOnce.add(index);
+        queue.push(index);
+      }
+      renderCard();
+    }
+
+    function showComplete() {
+      document.getElementById('study-view').hidden = true;
+      document.getElementById('complete-view').hidden = false;
+      const message = missedOnce.size > 0
+        ? `You got through all ${deck.cards.length} cards — ${missedOnce.size} needed a second try.`
+        : `Perfect run through all ${deck.cards.length} cards — no misses!`;
+      document.getElementById('complete-message').textContent = message;
+    }
+
+    document.getElementById('flip-card').addEventListener('click', flipCard);
+    document.getElementById('missed-btn').addEventListener('click', () => grade(false));
+    document.getElementById('got-it-btn').addEventListener('click', () => grade(true));
+    document.getElementById('randomize-side-toggle').addEventListener('change', () => {
+      if (deck) startSession();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('study-view').hidden) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        flipCard();
+      } else if (flipped && e.key === 'ArrowRight') {
+        grade(true);
+      } else if (flipped && e.key === 'ArrowLeft') {
+        grade(false);
+      }
+    });
+
+    let touchStartX = null;
+    const flipCardEl = document.getElementById('flip-card');
+    flipCardEl.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    flipCardEl.addEventListener('touchend', (e) => {
+      if (touchStartX === null || !flipped) { touchStartX = null; return; }
+      const dx = e.changedTouches[0].screenX - touchStartX;
+      touchStartX = null;
+      if (Math.abs(dx) < 40) return;
+      grade(dx > 0);
+    });
+
+    init();
+  </script>
+</body>
+</html>

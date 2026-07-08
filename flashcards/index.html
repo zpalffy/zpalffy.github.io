@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flash Cards — Free Online Study Tool</title>
+  <meta name="description" content="Create and study flash card decks right in your browser. No accounts, no server — everything is saved locally on your device.">
+  <meta name="keywords" content="flash cards, flashcard maker, study tool, quiz cards, free flashcards, online flashcards">
+  <meta name="author" content="zpalffy">
+  <link rel="canonical" href="https://zpalffy.github.io/flashcards/">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#4f46e5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#818cf8" media="(prefers-color-scheme: dark)">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="zpalffy">
+  <meta property="og:title" content="Flash Cards — Free Online Study Tool">
+  <meta property="og:description" content="Create and study flash card decks right in your browser. 100% client-side — your data never leaves your device.">
+  <meta property="og:url" content="https://zpalffy.github.io/flashcards/">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Flash Cards — Free Online Study Tool">
+  <meta name="twitter:description" content="Create and study flash card decks right in your browser. 100% client-side — your data never leaves your device.">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Flash Cards",
+    "url": "https://zpalffy.github.io/flashcards/",
+    "description": "Create and study flash card decks right in your browser. 100% client-side.",
+    "applicationCategory": "EducationApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2.1.1/css/pico.min.css">
+  <style>
+    :root {
+      --pico-font-size: 15px;
+      --pico-primary:           #4f46e5;
+      --pico-primary-hover:     #4338ca;
+      --pico-primary-focus:     rgba(79, 70, 229, 0.25);
+      --pico-primary-inverse:   #fff;
+      --pico-primary-underline: rgba(79, 70, 229, 0.5);
+      --accent:                 #e11d48;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --pico-primary:           #818cf8;
+        --pico-primary-hover:     #a5b4fc;
+        --pico-primary-focus:     rgba(129, 140, 248, 0.25);
+        --pico-primary-inverse:   #1e1b4b;
+        --pico-primary-underline: rgba(129, 140, 248, 0.5);
+        --accent:                 #fb7185;
+      }
+    }
+
+    main { padding: 1rem; max-width: 700px; margin: 0 auto; }
+
+    .actions { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem; }
+
+    #new-deck-form { display: flex; gap: 0.5rem; align-items: flex-start; margin-bottom: 1rem; }
+    #new-deck-form input { margin-bottom: 0; }
+    #new-deck-form button { flex-shrink: 0; margin-bottom: 0; }
+
+    #deck-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+    #deck-list li {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: var(--pico-border-width) solid var(--pico-form-element-border-color);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--pico-border-radius);
+      background: var(--pico-form-element-background-color);
+    }
+    .deck-info { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+    .deck-info strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .deck-info span { font-size: 0.8125rem; color: var(--pico-muted-color); }
+    .deck-buttons { display: flex; gap: 0.4rem; flex-shrink: 0; }
+    .deck-buttons button, .deck-buttons a[role="button"] { margin-bottom: 0; padding: 0.4rem 0.75rem; font-size: 0.8125rem; }
+    .deck-buttons a.disabled { pointer-events: none; opacity: 0.4; }
+
+    @media (max-width: 480px) {
+      #deck-list li { flex-direction: column; align-items: stretch; }
+      .deck-buttons { flex-wrap: wrap; }
+    }
+
+    #deck-list li#deck-empty {
+      border: none; background: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      padding: 3rem 1rem; gap: 0;
+    }
+    #deck-empty .empty-icon { font-size: 2.25rem; margin-bottom: 0.5rem; }
+    #deck-empty .empty-text { color: var(--pico-muted-color); font-style: italic; font-size: 0.9375rem; }
+
+    .editor-header { margin-bottom: 1.25rem; }
+    .back-link { display: inline-block; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    #deck-name-input {
+      display: block; width: 100%; margin-bottom: 0;
+      font-size: 1.5rem; font-weight: bold;
+      border: none; border-radius: 0; box-shadow: none;
+      border-bottom: 2px solid transparent;
+      background: transparent; padding: 0.25rem 0;
+    }
+    #deck-name-input:hover { border-bottom-color: var(--pico-form-element-border-color); }
+    #deck-name-input:focus { border-bottom-color: var(--pico-primary); }
+
+    #card-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+    .card-list-header { display: flex; gap: 0.5rem; padding: 0 0.75rem; }
+    .card-list-header span { flex: 1; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--pico-muted-color); }
+    .card-list-header .spacer-num { flex: 0 0 1.5rem; }
+    .card-list-header .spacer { flex: 0 0 2rem; }
+
+    .card-row {
+      display: flex; gap: 0.5rem; align-items: center;
+      padding: 0.5rem;
+      border: var(--pico-border-width) solid var(--pico-form-element-border-color);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--pico-border-radius);
+      background: var(--pico-form-element-background-color);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .card-row input { margin-bottom: 0; }
+    .card-num { flex: 0 0 1.5rem; text-align: center; color: var(--pico-muted-color); font-size: 0.8125rem; }
+    .card-delete {
+      flex: 0 0 2rem; width: 2rem; height: 2rem; padding: 0; margin-bottom: 0;
+      display: flex; align-items: center; justify-content: center;
+      border: none; background: none; border-radius: 50%;
+      color: var(--pico-muted-color); font-size: 1.1rem; line-height: 1; cursor: pointer;
+    }
+    .card-delete:hover { background: color-mix(in srgb, #dc2626 12%, transparent); color: #dc2626; }
+
+    #add-card-btn {
+      width: 100%; margin-bottom: 0;
+      background: transparent; color: var(--pico-primary);
+      border: 2px dashed var(--pico-form-element-border-color);
+    }
+    #add-card-btn:hover {
+      border-color: var(--pico-primary);
+      background: color-mix(in srgb, var(--pico-primary) 6%, transparent);
+    }
+
+    #card-empty {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 2rem 1rem; text-align: center;
+    }
+    #card-empty .empty-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    #card-empty .empty-text { color: var(--pico-muted-color); font-style: italic; font-size: 0.9375rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="container-fluid">
+      <ul>
+        <li><a href="../" class="secondary">← zpalffy</a></li>
+        <li><strong>Flash Cards</strong></li>
+      </ul>
+      <ul>
+        <li><a href="https://ko-fi.com/zpalffy" target="_blank" rel="noopener noreferrer" role="button" class="outline secondary">☕ Tip Jar</a></li>
+        <li><a href="#" role="button" class="outline secondary" onclick="openAbout(); return false;">ⓘ About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="deck-list-view">
+      <div class="actions">
+        <button id="new-deck-btn" onclick="showNewDeckForm()">+ New Deck</button>
+        <button class="outline secondary" onclick="document.getElementById('import-input').click()">Import</button>
+        <input type="file" id="import-input" accept="application/json,.json" hidden onchange="importDeckFile(this.files[0])">
+      </div>
+      <div id="new-deck-form" hidden>
+        <input type="text" id="new-deck-name" placeholder="Deck name" maxlength="60" autocomplete="off">
+        <button onclick="createDeck()">Create</button>
+        <button class="secondary" onclick="hideNewDeckForm()">Cancel</button>
+      </div>
+      <ul id="deck-list"></ul>
+    </section>
+
+    <section id="deck-editor-view" hidden>
+      <div class="editor-header">
+        <a href="#" class="back-link secondary" onclick="showDeckList(); return false;">← Decks</a>
+        <input type="text" id="deck-name-input" maxlength="60" autocomplete="off" oninput="renameCurrentDeck(this.value)">
+      </div>
+      <div id="card-list"></div>
+      <button id="add-card-btn" onclick="addCard()">+ Add card</button>
+    </section>
+  </main>
+
+  <dialog id="about-modal">
+    <article>
+      <header>
+        <button aria-label="Close" rel="prev" onclick="document.getElementById('about-modal').close()"></button>
+        <strong>Privacy &amp; About</strong>
+      </header>
+      <p>Create decks of flash cards, then tap Study to flip through them and quiz yourself.</p>
+      <p>Everything is saved locally in your browser (<code>localStorage</code>) so it's still here next time. Nothing is ever sent to a server.</p>
+      <p>No accounts. No analytics. No tracking. No cookies.</p>
+      <footer>
+        <button onclick="document.getElementById('about-modal').close()">Got it</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <script>
+    const STORAGE_KEY = 'flashcards-decks';
+
+    let decks = loadDecks();
+    let currentDeckId = null;
+
+    function loadDecks() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        return Array.isArray(raw) ? raw : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveDecks() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(decks));
+    }
+
+    function makeId() {
+      return crypto.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
+
+    // --- Deck list view ---
+
+    function renderDeckList() {
+      const listEl = document.getElementById('deck-list');
+      listEl.innerHTML = '';
+
+      if (decks.length === 0) {
+        const empty = document.createElement('li');
+        empty.id = 'deck-empty';
+        const icon = document.createElement('span');
+        icon.className = 'empty-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = '🗂️';
+        const text = document.createElement('span');
+        text.className = 'empty-text';
+        text.textContent = 'No decks yet — create one to get started.';
+        empty.append(icon, text);
+        listEl.appendChild(empty);
+        return;
+      }
+
+      for (const deck of decks) {
+        const li = document.createElement('li');
+
+        const info = document.createElement('div');
+        info.className = 'deck-info';
+        const name = document.createElement('strong');
+        name.textContent = deck.name;
+        const count = document.createElement('span');
+        count.textContent = `${deck.cards.length} card${deck.cards.length === 1 ? '' : 's'}`;
+        info.append(name, count);
+
+        const buttons = document.createElement('div');
+        buttons.className = 'deck-buttons';
+        const studyBtn = document.createElement('a');
+        studyBtn.setAttribute('role', 'button');
+        studyBtn.href = `study.html?deck=${encodeURIComponent(deck.id)}`;
+        studyBtn.textContent = 'Study';
+        const hasStudyableCard = deck.cards.some(c => (c[0] || '').trim() && (c[1] || '').trim());
+        if (!hasStudyableCard) {
+          studyBtn.setAttribute('aria-disabled', 'true');
+          studyBtn.classList.add('disabled');
+          studyBtn.removeAttribute('href');
+        }
+        const editBtn = document.createElement('button');
+        editBtn.className = 'outline secondary';
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = () => openDeckEditor(deck.id);
+        const exportBtn = document.createElement('button');
+        exportBtn.className = 'outline secondary';
+        exportBtn.textContent = 'Export';
+        exportBtn.onclick = () => exportDeck(deck.id);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'outline contrast';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = () => deleteDeck(deck.id);
+        buttons.append(studyBtn, editBtn, exportBtn, deleteBtn);
+
+        li.append(info, buttons);
+        listEl.appendChild(li);
+      }
+    }
+
+    function showNewDeckForm() {
+      document.getElementById('new-deck-form').hidden = false;
+      document.getElementById('new-deck-btn').hidden = true;
+      const input = document.getElementById('new-deck-name');
+      input.value = '';
+      input.focus();
+    }
+
+    function hideNewDeckForm() {
+      document.getElementById('new-deck-form').hidden = true;
+      document.getElementById('new-deck-btn').hidden = false;
+    }
+
+    function createDeck() {
+      const input = document.getElementById('new-deck-name');
+      const name = input.value.trim();
+      if (!name) {
+        input.focus();
+        return;
+      }
+      const deck = { id: makeId(), name, cards: [] };
+      decks.push(deck);
+      saveDecks();
+      hideNewDeckForm();
+      renderDeckList();
+      openDeckEditor(deck.id);
+    }
+
+    function deleteDeck(id) {
+      const deck = decks.find(d => d.id === id);
+      if (!deck) return;
+      if (!confirm(`Delete "${deck.name}" and all its cards?`)) return;
+      decks = decks.filter(d => d.id !== id);
+      saveDecks();
+      renderDeckList();
+    }
+
+    function slugify(name) {
+      const s = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      return s || 'deck';
+    }
+
+    function exportDeck(id) {
+      const deck = decks.find(d => d.id === id);
+      if (!deck) return;
+      const data = JSON.stringify({ name: deck.name, cards: deck.cards }, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${slugify(deck.name)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importDeckFile(file) {
+      if (!file) return;
+      const input = document.getElementById('import-input');
+      const reader = new FileReader();
+      reader.onload = () => {
+        let data;
+        try {
+          data = JSON.parse(reader.result);
+        } catch {
+          alert('That file is not valid JSON.');
+          return;
+        }
+        if (!data || typeof data.name !== 'string' || !Array.isArray(data.cards)) {
+          alert("That file doesn't look like a flash card deck.");
+          return;
+        }
+        const cards = data.cards
+          .filter(c => Array.isArray(c))
+          .map(c => [String(c[0] ?? ''), String(c[1] ?? '')]);
+        const deck = { id: makeId(), name: data.name.trim() || 'Imported deck', cards };
+        decks.push(deck);
+        saveDecks();
+        renderDeckList();
+      };
+      reader.readAsText(file);
+      input.value = '';
+    }
+
+    // --- Deck editor view ---
+
+    function isBlankCard(card) {
+      return !(card[0] || '').trim() && !(card[1] || '').trim();
+    }
+
+    function showDeckList() {
+      const deck = getCurrentDeck();
+      if (deck) {
+        const before = deck.cards.length;
+        deck.cards = deck.cards.filter(c => !isBlankCard(c));
+        if (deck.cards.length !== before) saveDecks();
+      }
+      currentDeckId = null;
+      document.getElementById('deck-editor-view').hidden = true;
+      document.getElementById('deck-list-view').hidden = false;
+      renderDeckList();
+    }
+
+    function openDeckEditor(id) {
+      currentDeckId = id;
+      const deck = decks.find(d => d.id === id);
+      if (!deck) return;
+      document.getElementById('deck-list-view').hidden = true;
+      document.getElementById('deck-editor-view').hidden = false;
+      document.getElementById('deck-name-input').value = deck.name;
+      renderCardList();
+    }
+
+    function getCurrentDeck() {
+      return decks.find(d => d.id === currentDeckId);
+    }
+
+    function renameCurrentDeck(newName) {
+      const deck = getCurrentDeck();
+      if (!deck) return;
+      deck.name = newName.trim() || deck.name;
+      saveDecks();
+    }
+
+    function renderCardList() {
+      const deck = getCurrentDeck();
+      const listEl = document.getElementById('card-list');
+      listEl.innerHTML = '';
+
+      if (!deck || deck.cards.length === 0) {
+        const empty = document.createElement('div');
+        empty.id = 'card-empty';
+        empty.innerHTML = '<span class="empty-icon" aria-hidden="true">🃏</span><span class="empty-text">No cards yet — add one below.</span>';
+        listEl.appendChild(empty);
+        return;
+      }
+
+      const header = document.createElement('div');
+      header.className = 'card-list-header';
+      header.innerHTML = '<span class="spacer-num"></span><span>Front</span><span>Back</span><span class="spacer"></span>';
+      listEl.appendChild(header);
+
+      deck.cards.forEach((card, index) => {
+        const row = document.createElement('div');
+        row.className = 'card-row';
+
+        const num = document.createElement('span');
+        num.className = 'card-num';
+        num.textContent = String(index + 1);
+
+        const front = document.createElement('input');
+        front.type = 'text';
+        front.placeholder = 'Front';
+        front.value = card[0] || '';
+        front.oninput = () => updateCard(index, 0, front.value);
+
+        const back = document.createElement('input');
+        back.type = 'text';
+        back.placeholder = 'Back';
+        back.value = card[1] || '';
+        back.oninput = () => updateCard(index, 1, back.value);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'card-delete';
+        deleteBtn.textContent = '✕';
+        deleteBtn.setAttribute('aria-label', 'Delete card');
+        deleteBtn.onclick = () => deleteCard(index);
+
+        row.append(num, front, back, deleteBtn);
+        listEl.appendChild(row);
+      });
+    }
+
+    function updateCard(index, sideIndex, value) {
+      const deck = getCurrentDeck();
+      if (!deck) return;
+      deck.cards[index][sideIndex] = value;
+      saveDecks();
+    }
+
+    function addCard() {
+      const deck = getCurrentDeck();
+      if (!deck) return;
+      deck.cards.push(['', '']);
+      saveDecks();
+      renderCardList();
+      const rows = document.querySelectorAll('#card-list .card-row input');
+      const lastFront = rows[rows.length - 2];
+      if (lastFront) lastFront.focus();
+    }
+
+    function deleteCard(index) {
+      const deck = getCurrentDeck();
+      if (!deck) return;
+      deck.cards.splice(index, 1);
+      saveDecks();
+      renderCardList();
+    }
+
+    // --- About modal ---
+
+    function openAbout() {
+      document.getElementById('about-modal').showModal();
+    }
+
+    renderDeckList();
+  </script>
+</body>
+</html>
