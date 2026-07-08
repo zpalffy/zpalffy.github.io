@@ -211,7 +211,15 @@
     const tooltipEl = document.getElementById('tooltip');
     const mapWrapEl = document.querySelector('.map-wrap');
 
-    let visited = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+    function loadVisited() {
+      try {
+        return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+      } catch {
+        return new Set();
+      }
+    }
+
+    let visited = loadVisited();
     colorInput.value = localStorage.getItem(COLOR_KEY) || '#4f46e5';
 
     let countryPaths = null;
