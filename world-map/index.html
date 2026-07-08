@@ -67,6 +67,7 @@
     .actions button { margin-bottom: 0; }
     .actions label { font-size: 0.875rem; margin-bottom: 0; display: flex; align-items: center; gap: 0.4rem; }
     .actions input[type="color"] { width: 2.5rem; height: 2.25rem; padding: 2px; margin-bottom: 0; cursor: pointer; }
+    .actions select { width: auto; margin-bottom: 0; }
 
     .content { flex: 1; min-height: 0; display: flex; gap: 1rem; }
 
@@ -161,6 +162,15 @@
     <div class="actions">
       <label for="color">Fill color <input type="color" id="color" disabled></label>
       <button id="clear-btn" class="outline secondary" onclick="clearAll()" disabled>Clear all</button>
+      <label for="export-size">Size
+        <select id="export-size" disabled>
+          <option value="current">Current view</option>
+          <option value="1920x1080">Desktop (1920×1080)</option>
+          <option value="3840x2160">Desktop 4K (3840×2160)</option>
+          <option value="3000x2400">Print 8×10in @300dpi (3000×2400)</option>
+          <option value="6000x4800">Print 16×20in @300dpi (6000×4800)</option>
+        </select>
+      </label>
       <button id="download-btn" class="outline secondary" onclick="download()" disabled>Download PNG</button>
       <span id="status"></span>
     </div>
@@ -211,6 +221,7 @@
     const searchClearEl = document.getElementById('search-clear');
     const clearBtnEl = document.getElementById('clear-btn');
     const downloadBtnEl = document.getElementById('download-btn');
+    const exportSizeEl = document.getElementById('export-size');
     const tooltipEl = document.getElementById('tooltip');
     const mapWrapEl = document.querySelector('.map-wrap');
 
@@ -268,9 +279,13 @@
     }
 
     function download() {
-      const scale = 2;
-      const width = mapWrapEl.clientWidth * scale;
-      const height = mapWrapEl.clientHeight * scale;
+      let width, height;
+      if (exportSizeEl.value === 'current') {
+        width = mapWrapEl.clientWidth * 2;
+        height = mapWrapEl.clientHeight * 2;
+      } else {
+        [width, height] = exportSizeEl.value.split('x').map(Number);
+      }
 
       // Read the live theme's colors instead of hardcoding them, so the export
       // matches whatever the user is actually looking at (including dark mode)
@@ -284,21 +299,25 @@
         : (isDark ? '#3f3f46' : '#cbd5e1'); // fallback for the edge case where every country is selected
       const backgroundColor = getComputedStyle(document.documentElement).backgroundColor;
 
-      // The clone is serialized outside the document, so it can't see the page's
-      // external stylesheet (the .country/.visited classes and --visited-fill var
-      // would resolve to nothing, leaving SVG's default black fill). Bake the
-      // actual colors in as explicit attributes instead.
-      const clone = svg.node().cloneNode(true);
-      clone.setAttribute('width', width);
-      clone.setAttribute('height', height);
-      d3.select(clone).selectAll('path.country')
-        .attr('fill', function () {
-          return this.classList.contains('visited') ? colorInput.value : baseFill;
-        })
+      // Build a fresh, detached SVG re-projected at the chosen export size rather
+      // than cloning the on-screen one, since the export resolution (e.g. a 300dpi
+      // print size) is often very different from the visible map's pixel size.
+      const exportProjection = d3.geoNaturalEarth1().fitSize([width, height], countriesData);
+      const exportPath = d3.geoPath(exportProjection);
+      const exportSvg = d3.create('svg')
+        .attr('xmlns', 'http://www.w3.org/2000/svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('viewBox', `0 0 ${width} ${height}`);
+      exportSvg.selectAll('path')
+        .data(countriesData.features)
+        .join('path')
+        .attr('d', exportPath)
+        .attr('fill', d => visited.has(String(d.id)) ? colorInput.value : baseFill)
         .attr('stroke', baseStroke)
         .attr('stroke-width', 0.5);
 
-      const xml = new XMLSerializer().serializeToString(clone);
+      const xml = new XMLSerializer().serializeToString(exportSvg.node());
       const svgBlob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(svgBlob);
 
@@ -421,6 +440,7 @@
       clearBtnEl.disabled = !enabled;
       downloadBtnEl.disabled = !enabled;
       searchEl.disabled = !enabled;
+      exportSizeEl.disabled = !enabled;
     }
 
     async function init() {
