@@ -159,7 +159,7 @@
 
   <main>
     <div class="actions">
-      <label for="color">Fill color <input type="color" id="color" value="#4f46e5" disabled></label>
+      <label for="color">Fill color <input type="color" id="color" disabled></label>
       <button id="clear-btn" class="outline secondary" onclick="clearAll()" disabled>Clear all</button>
       <button id="download-btn" class="outline secondary" onclick="download()" disabled>Download PNG</button>
       <span id="status"></span>
@@ -200,6 +200,7 @@
   <script>
     const STORAGE_KEY = 'world-map-visited';
     const COLOR_KEY = 'world-map-color';
+    const DEFAULT_FILL_COLOR = '#4f46e5';
 
     const svg = d3.select('#map');
     const emptyEl = document.getElementById('map-empty');
@@ -222,7 +223,7 @@
     }
 
     let visited = loadVisited();
-    colorInput.value = localStorage.getItem(COLOR_KEY) || '#4f46e5';
+    colorInput.value = localStorage.getItem(COLOR_KEY) || DEFAULT_FILL_COLOR;
 
     let countryPaths = null;
     let projection = null;
