@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Visited Countries Map — Free Online Tool</title>
+  <title>Country Map — Free Online Tool</title>
   <meta name="description" content="Click countries you've visited and color them in on a world map. Download a high-res PNG. 100% client-side — your data never leaves your device.">
   <meta name="keywords" content="visited countries map, travel map maker, countries visited generator, world map colorer, places been map">
   <meta name="author" content="zpalffy">
@@ -15,21 +15,21 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="zpalffy">
-  <meta property="og:title" content="Visited Countries Map — Free Online Tool">
+  <meta property="og:title" content="Country Map — Free Online Tool">
   <meta property="og:description" content="Click countries you've visited and color them in on a world map. Download a high-res PNG. 100% client-side — your data never leaves your device.">
   <meta property="og:url" content="https://zpalffy.github.io/world-map/">
   <meta property="og:locale" content="en_US">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Visited Countries Map — Free Online Tool">
+  <meta name="twitter:title" content="Country Map — Free Online Tool">
   <meta name="twitter:description" content="Click countries you've visited and color them in on a world map. 100% client-side — your data never leaves your device.">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "Visited Countries Map",
+    "name": "Country Map",
     "url": "https://zpalffy.github.io/world-map/",
     "description": "Click countries you've visited and color them in on a world map. Download a high-res PNG. 100% client-side.",
     "applicationCategory": "DesignApplication",
@@ -137,7 +137,7 @@
     <nav class="container-fluid">
       <ul>
         <li><a href="../" class="secondary">← zpalffy</a></li>
-        <li><strong>Visited Countries Map</strong></li>
+        <li><strong>Country Map</strong></li>
       </ul>
       <ul>
         <li><a href="https://ko-fi.com/zpalffy" target="_blank" rel="noopener noreferrer" role="button" class="outline secondary">☕ Tip Jar</a></li>
@@ -218,6 +218,8 @@
     }
 
     function clearAll() {
+      if (visited.size === 0) return;
+      if (!confirm(`Clear all ${visited.size} colored ${visited.size === 1 ? 'country' : 'countries'}?`)) return;
       visited.clear();
       localStorage.setItem(STORAGE_KEY, '[]');
       applyStyles();
