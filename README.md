@@ -21,6 +21,7 @@ A collection of simple, fast, browser-based tools and games at [zpalffy.github.i
 | [Pomodoro Timer](https://zpalffy.github.io/pomodoro/) | Focus timer with work/break intervals, sound alerts, and browser notifications |
 | [Unix Timestamp Converter](https://zpalffy.github.io/timestamp/) | Convert epoch timestamps to human-readable dates and back; live relative time |
 | [CSV → JSON Converter](https://zpalffy.github.io/csv/) | Convert CSV to JSON or browse as a table; auto-detects delimiters and headers |
+| [Country Map](https://zpalffy.github.io/world-map/) | Click countries you've visited and color them in on a world map; download as PNG |
 
 ## Tech
 
