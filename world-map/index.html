@@ -162,7 +162,7 @@
     <div class="actions">
       <label for="color">Fill color <input type="color" id="color" disabled></label>
       <button id="clear-btn" class="outline secondary" onclick="clearAll()" disabled>Clear all</button>
-      <button id="download-btn" class="outline secondary" onclick="openDownloadModal()" disabled>Download PNG</button>
+      <button id="download-btn" class="outline secondary" onclick="openDownloadModal()" disabled>Download</button>
       <span id="status"></span>
     </div>
     <div class="content">
@@ -187,15 +187,16 @@
     <article>
       <header>
         <button aria-label="Close" rel="prev" onclick="document.getElementById('download-modal').close()"></button>
-        <strong>Download PNG</strong>
+        <strong>Download</strong>
       </header>
-      <label for="export-size">Size
+      <label for="export-size">Format
         <select id="export-size">
-          <option value="current">Current view</option>
+          <option value="current">Current view (PNG)</option>
           <option value="1920x1080">Desktop (1920×1080)</option>
           <option value="3840x2160">Desktop 4K (3840×2160)</option>
           <option value="3000x2400">Print 8×10in @300dpi (3000×2400)</option>
           <option value="6000x4800">Print 16×20in @300dpi (6000×4800)</option>
+          <option value="svg">SVG (vector)</option>
         </select>
       </label>
       <footer>
@@ -211,7 +212,7 @@
         <button aria-label="Close" rel="prev" onclick="document.getElementById('about-modal').close()"></button>
         <strong>Privacy &amp; About</strong>
       </header>
-      <p>Click a country to color it in — click again to remove it. Pick any color and download a PNG when you're done.</p>
+      <p>Click a country to color it in — click again to remove it. Pick any color and download a PNG or SVG when you're done.</p>
       <p>Your selections are saved locally in your browser (<code>localStorage</code>) so they're still here next time. Nothing is ever sent to a server.</p>
       <p>No accounts. No analytics. No tracking. No cookies.</p>
       <footer>
@@ -292,12 +293,17 @@
     }
 
     function download() {
+      const format = exportSizeEl.value;
+      const isSvg = format === 'svg';
+
+      // SVG has no fixed resolution, so for both "current view" and "svg" we
+      // just use the on-screen aspect ratio rather than a specific pixel target.
       let width, height;
-      if (exportSizeEl.value === 'current') {
+      if (format === 'current' || isSvg) {
         width = mapWrapEl.clientWidth * 2;
         height = mapWrapEl.clientHeight * 2;
       } else {
-        [width, height] = exportSizeEl.value.split('x').map(Number);
+        [width, height] = format.split('x').map(Number);
       }
 
       // Read the live theme's colors instead of hardcoding them, so the export
@@ -333,6 +339,15 @@
       const xml = new XMLSerializer().serializeToString(exportSvg.node());
       const svgBlob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
       const url = URL.createObjectURL(svgBlob);
+
+      if (isSvg) {
+        const a = document.createElement('a');
+        a.download = 'visited-countries.svg';
+        a.href = url;
+        a.click();
+        URL.revokeObjectURL(url);
+        return;
+      }
 
       const img = new Image();
       img.onload = () => {
